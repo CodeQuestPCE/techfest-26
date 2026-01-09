@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { eventService } from '@/services/eventService';
 import { useAuthStore } from '@/store/authStore';
@@ -11,8 +11,39 @@ import MobileMenu from '@/components/MobileMenu';
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
   const eventId = params.id as string;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'TBA';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'TBA';
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch {
+      return 'TBA';
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    if (!dateString) return 'TBA';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'TBA';
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return 'TBA';
+    }
+  };
 
   const getCategoryDisplayName = (category: string) => {
     const names: any = {
@@ -45,9 +76,19 @@ export default function EventDetailPage() {
     router.push('/');
   };
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading, error } = useQuery({
     queryKey: ['event', eventId],
-    queryFn: () => eventService.getEvent(eventId),
+    queryFn: async () => {
+      try {
+        const result = await eventService.getEvent(eventId);
+        console.log('Event data fetched:', result);
+        return result;
+      } catch (err) {
+        console.error('Error fetching event:', err);
+        throw err;
+      }
+    },
+    retry: 1,
   });
 
   const handleRegister = () => {
@@ -62,6 +103,21 @@ export default function EventDetailPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white rounded-3xl shadow-2xl p-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Error loading event</h2>
+          <p className="text-gray-600 mb-6">{error instanceof Error ? error.message : 'Failed to load event'}</p>
+          <Link href="/events" className="inline-flex items-center gap-2 text-purple-600 hover:text-pink-600 font-semibold transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+            Back to events
+          </Link>
+        </div>
       </div>
     );
   }
@@ -93,9 +149,20 @@ export default function EventDetailPage() {
             <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             EventHub
           </Link>
-          <div className="hidden lg:flex items-center gap-6">
-            <Link href="/events" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
-              Browse Events
+          <div className="hidden lg:flex items-center gap-4">
+            <Link
+              href="/"
+              className="px-4 py-2 text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              href="/events"
+              className={`px-4 py-2 font-medium transition-colors ${
+                pathname.startsWith('/events') ? 'text-purple-600 font-semibold' : 'text-gray-700 hover:text-purple-600'
+              }`}
+            >
+              Events
             </Link>
             {isAuthenticated() ? (
               <>
@@ -188,23 +255,21 @@ export default function EventDetailPage() {
                 <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
                 <div>
                   <div className="text-xs sm:text-sm text-gray-600">Date</div>
-                  <div className="font-semibold text-sm sm:text-base">{new Date(eventData.date).toLocaleDateString()}</div>
+                  <div className="font-semibold text-sm sm:text-base">{formatDate(eventData.startDate)}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
                 <div>
                   <div className="text-xs sm:text-sm text-gray-600">Time</div>
-                  <div className="font-semibold text-sm sm:text-base">
-                    {new Date(eventData.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
+                  <div className="font-semibold text-sm sm:text-base">{formatTime(eventData.startDate)}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
                 <div>
                   <div className="text-xs sm:text-sm text-gray-600">Venue</div>
-                  <div className="font-semibold text-sm sm:text-base truncate">{eventData.venue}</div>
+                  <div className="font-semibold text-sm sm:text-base truncate">{eventData.location?.venue || eventData.venue || 'TBA'}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">

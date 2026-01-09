@@ -119,3 +119,54 @@ exports.sendCertificateEmail = async (email, name, eventTitle, certificateUrl) =
     console.error('Error sending certificate email:', error.message);
   }
 };
+
+// Send password reset email
+exports.sendPasswordResetEmail = async (email, name, resetUrl) => {
+  try {
+    const transporter = createTransporter();
+    
+    await transporter.sendMail({
+      from: `"TechFest Platform" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: '🔒 Password Reset Request',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #9333ea;">Hello ${name},</h2>
+          <p>You requested to reset your password for your TechFest Platform account.</p>
+          <p>Please click the button below to reset your password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" 
+               style="background: linear-gradient(to right, #9333ea, #db2777); 
+                      color: white; 
+                      padding: 12px 30px; 
+                      text-decoration: none; 
+                      border-radius: 25px;
+                      font-weight: bold;
+                      display: inline-block;">
+              Reset Password
+            </a>
+          </div>
+          <p style="color: #666; font-size: 14px;">
+            This link will expire in 10 minutes for security reasons.
+          </p>
+          <p style="color: #666; font-size: 14px;">
+            If you didn't request this password reset, please ignore this email or contact support if you have concerns.
+          </p>
+          <hr style="border: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #999; font-size: 12px;">
+            If the button doesn't work, copy and paste this link into your browser:<br/>
+            <span style="color: #9333ea;">${resetUrl}</span>
+          </p>
+          <br/>
+          <p>Best regards,<br/><strong>TechFest Team</strong></p>
+        </div>
+      `
+    });
+
+    console.log('Password reset email sent successfully to:', email);
+    return true;
+  } catch (error) {
+    console.error('Error sending password reset email:', error.message);
+    return false;
+  }
+};

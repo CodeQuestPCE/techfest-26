@@ -98,7 +98,16 @@ export default function EventRegisterPage() {
             </button>
           </div>
 
-          {/* Mobile Navigation */}6 sm:py-8 max-w-4xl">
+          {/* Mobile Navigation */}
+          <MobileMenu 
+            isAuthenticated={isAuthenticated()}
+            userRole={user?.role}
+            onLogout={handleLogout}
+          />
+        </nav>
+      </header>
+
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
         <Link href={`/events/${eventId}`} className="inline-flex items-center gap-2 text-purple-600 hover:text-pink-600 mb-4 sm:mb-6 font-semibold transition-colors">
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           Back to event
@@ -106,16 +115,7 @@ export default function EventRegisterPage() {
 
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 lg:p-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 sm:mb-3">Register for Event</h1>
-          <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Link href={`/events/${eventId}`} className="inline-flex items-center gap-2 text-purple-600 hover:text-pink-600 mb-6 font-semibold transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-          Back to event
-        </Link>
-
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">Register for Event</h1>
-          <h2 className="text-xl text-gray-600 mb-8 font-medium">{eventData.title}</h2>
+          <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 font-medium">{eventData.title}</h2>
 
           <ManualPaymentForm event={eventData} />
         </div>

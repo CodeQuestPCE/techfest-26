@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { eventService } from '@/services/eventService';
 import { useAuthStore } from '@/store/authStore';
 import { Calendar, MapPin, Users, IndianRupee, Search, Sparkles, TrendingUp, Zap, LogOut, Home } from 'lucide-react';
@@ -11,6 +11,7 @@ import MobileMenu from '@/components/MobileMenu';
 
 export default function EventsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -96,7 +97,18 @@ export default function EventsPage() {
           
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-4">
-            <Link href="/events" className="text-purple-600 font-semibold">
+            <Link
+              href="/"
+              className="px-4 py-2 text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              href="/events"
+              className={`px-4 py-2 font-medium transition-colors ${
+                pathname.startsWith('/events') ? 'text-purple-600 font-semibold' : 'text-gray-700 hover:text-purple-600'
+              }`}
+            >
               Events
             </Link>
             {isAuthenticated() ? (

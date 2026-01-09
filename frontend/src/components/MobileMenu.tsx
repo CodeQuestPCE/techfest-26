@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { X } from 'lucide-react';
 
 interface MobileMenuProps {
   isAuthenticated: boolean;
@@ -12,171 +13,203 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ isAuthenticated, userRole, onLogout }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const pathname = usePathname();
 
-  // Lock body scroll when menu is open
+  // Set mounted state on client side only
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Prevent body scroll when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
+    
+    // Prevent horizontal scroll always
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+    
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.style.overflowX = 'hidden';
+      document.documentElement.style.overflowX = 'hidden';
     };
   }, [isOpen]);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+  // Close menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Collect all menu items based on authentication and role
+  const menuItems = [];
+
+  // Use client-side authentication state only after mount to prevent hydration mismatch
+  if (isMounted && isAuthenticated) {
+    menuItems.push(
+      { label: 'Home', href: '/' },
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Browse Events', href: '/events' }
+    );
+
+    if (userRole === 'ambassador') {
+      menuItems.push({ label: 'Ambassador Dashboard', href: '/ambassador/dashboard' });
+    }
+
+    if (userRole === 'coordinator') {
+      menuItems.push(
+        { label: 'Create Event', href: '/create-event' },
+        { label: 'QR Scanner', href: '/admin/scanner' }
+      );
+    }
+
+    if (userRole === 'admin') {
+      menuItems.push(
+        { label: 'Payments', href: '/admin/dashboard' },
+        { label: 'Registrations', href: '/admin/registrations' },
+        { label: 'Users', href: '/admin/users' },
+        { label: 'Manage Events', href: '/admin/events' },
+        { label: 'QR Scanner', href: '/admin/scanner' },
+        { label: 'Activity Logs', href: '/admin/logs' },
+        { label: 'Analytics', href: '/admin/analytics' },
+        { label: 'Settings', href: '/admin/settings' },
+        { label: 'Create Event', href: '/create-event' }
+      );
+    }
+  } else {
+    menuItems.push(
+      { label: 'Home', href: '/' },
+      { label: 'Browse Events', href: '/events' },
+      { label: 'Login', href: '/login' },
+      { label: 'Sign Up', href: '/register' }
+    );
+  }
 
   return (
     <>
-      {/* Mobile Menu Button - Only visible on mobile */}
+      {/* Hamburger Button */}
       <button
-        onClick={toggleMenu}
-        className="lg:hidden p-2 text-gray-700 hover:text-purple-600 hover:bg-gray-100 rounded-lg transition-colors relative z-50"
-        aria-label="Toggle menu"
         type="button"
+        className="lg:hidden p-2 rounded-lg hover:bg-purple-50 transition-all w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle menu"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          {/* Hamburger Icon */}
+          <i
+            className={`absolute w-full h-[2px] sm:h-[2.5px] transition-all duration-300 ease-in-out ${
+              isOpen
+                ? 'bg-transparent rotate-90'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600'
+            }`}
+            style={{
+              top: '50%',
+              left: 0,
+              transformOrigin: 'center',
+            }}
+          >
+            <span
+              className={`absolute w-full h-[2px] sm:h-[2.5px] bg-white left-1/2 transition-transform duration-300 shadow-md ${
+                isOpen
+                  ? 'rotate-45 -translate-x-1/2 -translate-y-1/2'
+                  : '-translate-x-1/2 -translate-y-[10px] sm:-translate-y-[12px] bg-gradient-to-r from-purple-600 to-pink-600'
+              }`}
+              style={{ transformOrigin: '50% 50%' }}
+            />
+            <span
+              className={`absolute w-full h-[2px] sm:h-[2.5px] bg-white left-1/2 transition-transform duration-300 shadow-md ${
+                isOpen
+                  ? '-rotate-45 -translate-x-1/2 -translate-y-1/2'
+                  : '-translate-x-1/2 translate-y-[10px] sm:translate-y-[12px] bg-gradient-to-r from-purple-600 to-pink-600'
+              }`}
+              style={{ transformOrigin: '50% 50%' }}
+            />
+          </i>
+        </div>
       </button>
 
-      {/* Backdrop Overlay - Higher z-index */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-[60] lg:hidden backdrop-blur-sm"
-          onClick={closeMenu}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Menu Drawer - Highest z-index */}
+      {/* Backdrop Overlay */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 sm:w-80 bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out lg:hidden ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          isOpen ? 'opacity-100 pointer-events-auto z-[60]' : 'opacity-0 pointer-events-none -z-10'
         }`}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-600 to-pink-600 flex-shrink-0">
-            <h2 className="text-xl font-bold text-white">Menu</h2>
-            <button
-              onClick={closeMenu}
-              className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
-              aria-label="Close menu"
-              type="button"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        onClick={() => setIsOpen(false)}
+      />
 
-          {/* Navigation Links - Scrollable */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-2">
-            {isAuthenticated ? (
-              <>
+      {/* Slide-out Menu Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-screen w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[35vw] max-w-md transition-all duration-300 ease-in-out lg:hidden overflow-hidden shadow-2xl ${
+          isOpen
+            ? 'translate-x-0 z-[70] pointer-events-auto visible'
+            : 'translate-x-full -z-10 pointer-events-none invisible'
+        }`}
+        style={{
+          background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.98) 0%, rgba(219, 39, 119, 0.98) 100%)',
+        }}
+      >
+        {/* Menu Header with Close Button */}
+        <div className="flex items-center justify-between px-4 py-5 border-b border-white/20">
+          <h2 className="text-white text-xl font-bold">Menu</h2>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-2 rounded-lg hover:bg-white/20 transition-all"
+            aria-label="Close menu"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+        </div>
+
+        {/* Menu Items Container */}
+        <div className="h-full w-full pb-6 overflow-y-auto">
+          <ul className="w-full px-4">
+            {menuItems.map((item, index) => (
+              <li
+                key={item.href}
+                className={`list-none transition-all duration-300 ${
+                  isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+                }`}
+                style={{
+                  transitionDelay: isOpen ? `${index * 0.05}s` : '0s',
+                }}
+              >
                 <Link
-                  href="/dashboard"
-                  onClick={closeMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`block text-left text-white no-underline py-3.5 px-4 my-1 text-base sm:text-lg font-medium rounded-lg transition-all hover:bg-white/20 active:bg-white/30 ${
+                    pathname === item.href ? 'bg-white/25 font-semibold' : ''
+                  }`}
                 >
-                  Dashboard
+                  {item.label}
                 </Link>
-                <Link
-                  href="/events"
-                  onClick={closeMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                >
-                  Events
-                </Link>
-                {userRole === 'ambassador' && (
-                  <Link
-                    href="/ambassador/dashboard"
-                    onClick={closeMenu}
-                    className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                  >
-                    Ambassador
-                  </Link>
-                )}
-                {userRole === 'admin' && (
-                  <>
-                    <Link
-                      href="/admin/dashboard"
-                      onClick={closeMenu}
-                      className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                    >
-                      Admin Panel
-                    </Link>
-                    <Link
-                      href="/admin/scanner"
-                      onClick={closeMenu}
-                      className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                    >
-                      Scanner
-                    </Link>
-                    <Link
-                      href="/create-event"
-                      onClick={closeMenu}
-                      className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                    >
-                      Create Event
-                    </Link>
-                  </>
-                )}
-                
-                {/* Divider */}
-                <div className="my-2 border-t border-gray-200"></div>
-                
+              </li>
+            ))}
+
+            {/* Logout Button */}
+            {isAuthenticated && (
+              <li
+                className={`list-none transition-all duration-300 border-t border-white/30 mt-4 pt-4 ${
+                  isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+                }`}
+                style={{
+                  transitionDelay: isOpen ? `${menuItems.length * 0.05}s` : '0s',
+                }}
+              >
                 <button
                   onClick={() => {
-                    closeMenu();
+                    setIsOpen(false);
                     onLogout();
                   }}
-                  className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-                  type="button"
+                  className="w-full text-left text-white py-3.5 px-4 text-base sm:text-lg font-medium rounded-lg transition-all bg-red-500/20 hover:bg-red-500/40 active:bg-red-500/50"
                 >
                   Logout
                 </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/"
-                  onClick={closeMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/events"
-                  onClick={closeMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                >
-                  Events
-                </Link>
-                <Link
-                  href="/login"
-                  onClick={closeMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors font-medium"
-                >
-                  Login
-                </Link>
-                
-                {/* Divider */}
-                <div className="my-2 border-t border-gray-200"></div>
-                
-                <Link
-                  href="/register"
-                  onClick={closeMenu}
-                  className="block px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-all text-center font-semibold"
-                >
-                  Get Started
-                </Link>
-              </>
+              </li>
             )}
-            </div>
-          </nav>
+          </ul>
         </div>
       </div>
     </>

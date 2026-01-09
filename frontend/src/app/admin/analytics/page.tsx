@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { BarChart3, Users, Calendar, IndianRupee, CheckCircle, Clock, XCircle, Home, LogOut, TrendingUp, Award, Sparkles, Shield } from 'lucide-react';
+import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 export default function AdminAnalyticsPage() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function AdminAnalyticsPage() {
             <Shield className="w-8 h-8 text-purple-600" />
             EventHub Admin
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <Link href="/admin/dashboard" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
               Payments
             </Link>
@@ -113,6 +114,7 @@ export default function AdminAnalyticsPage() {
               <LogOut className="w-4 h-4" />
             </button>
           </div>
+          <AdminMobileMenu currentPath="/admin/analytics" onLogout={() => { logout(); router.push('/'); }} />
         </nav>
       </header>
 

@@ -73,21 +73,21 @@ const eventSchema = new mongoose.Schema({
   ticketTypes: [{
     name: {
       type: String,
-      required: true
+      default: 'General'
     },
     price: {
       type: Number,
-      required: true,
+      default: 0,
       min: 0
     },
     quantity: {
       type: Number,
-      required: true,
+      default: 0,
       min: 0
     },
     available: {
       type: Number,
-      required: true
+      default: 0
     },
     description: String
   }],
@@ -135,7 +135,44 @@ const eventSchema = new mongoose.Schema({
 
 eventSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
+  
+  // Ensure ticketTypes has valid data
+  if (!this.ticketTypes || this.ticketTypes.length === 0) {
+    this.ticketTypes = [{
+      name: 'General',
+      price: this.registrationFee || 0,
+      quantity: this.capacity || 0,
+      available: this.capacity || 0
+    }];
+  } else {
+    // Populate missing fields in ticketTypes
+    this.ticketTypes = this.ticketTypes.map(ticket => ({
+      name: ticket.name || 'General',
+      price: ticket.price !== undefined ? ticket.price : (this.registrationFee || 0),
+      quantity: ticket.quantity !== undefined ? ticket.quantity : (this.capacity || 0),
+      available: ticket.available !== undefined ? ticket.available : (this.capacity || 0),
+      description: ticket.description
+    }));
+  }
+  
   next();
 });
+
+// Indexes for query optimization
+eventSchema.index({ title: 'text', description: 'text', tags: 'text' }); // Text search
+eventSchema.index({ category: 1, status: 1 });
+eventSchema.index({ startDate: 1, endDate: 1 });
+eventSchema.index({ status: 1, isPublic: 1 });
+eventSchema.index({ organizer: 1, createdAt: -1 });
+eventSchema.index({ createdAt: -1 });
+eventSchema.index({ registeredCount: -1 });
+
+// Compound indexes for common queries
+eventSchema.index({ status: 1, startDate: 1 });
+eventSchema.index({ category: 1, startDate: 1 });
+eventSchema.index({ status: 1, isPublic: 1, startDate: 1 });
+
+// Geospatial index for location-based queries
+eventSchema.index({ 'location.coordinates': '2dsphere' });
 
 module.exports = mongoose.model('Event', eventSchema);

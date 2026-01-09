@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Please provide an email'],
-    unique: true,
     lowercase: true,
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
@@ -41,9 +40,7 @@ const userSchema = new mongoose.Schema({
     default: null
   },
   referralCode: {
-    type: String,
-    unique: true,
-    sparse: true
+    type: String
   },
   referredBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -80,5 +77,18 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Indexes for query optimization
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ referralCode: 1 }, { unique: true, sparse: true });
+userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
+userSchema.index({ referredBy: 1 });
+userSchema.index({ resetPasswordToken: 1 }, { sparse: true });
+userSchema.index({ verificationToken: 1 }, { sparse: true });
+
+// Compound indexes for common queries
+userSchema.index({ role: 1, createdAt: -1 });
+userSchema.index({ isVerified: 1, role: 1 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,15 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Settings as SettingsIcon, Shield, Home, LogOut } from 'lucide-react';
+import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 export default function PaymentSettings() {
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const queryClient = useQueryClient();
   const [upiId, setUpiId] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
+
+  useEffect(() => {
+    if (!isAuthenticated() || user?.role !== 'admin') {
+      router.push('/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['paymentSettings'],
@@ -78,15 +95,57 @@ export default function PaymentSettings() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading settings...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Payment Settings</h1>
-        <p className="text-gray-600 mt-2">Configure global payment details for all events</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+            <Shield className="w-8 h-8 text-purple-600" />
+            EventHub Admin
+          </Link>
+          <div className="hidden lg:flex items-center gap-4">
+            <Link href="/admin/dashboard" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              Payments
+            </Link>
+            <Link href="/admin/events" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              Events
+            </Link>
+            <Link href="/admin/users" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              Users
+            </Link>
+            <Link href="/admin/settings" className="text-purple-600 font-semibold">
+              Settings
+            </Link>
+            <Link href="/dashboard" className="flex items-center gap-2 text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              <Home className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+          <AdminMobileMenu currentPath="/admin/settings" onLogout={handleLogout} />
+        </nav>
+      </header>
+
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Payment Settings</h1>
+          <p className="text-gray-600 mt-2">Configure global payment details for all events</p>
+        </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
         {/* UPI ID */}
@@ -190,6 +249,7 @@ export default function PaymentSettings() {
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
+const emailService = require('../utils/emailService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -188,14 +189,32 @@ exports.forgotPassword = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    // Send email (implement email service)
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    // Create reset URL
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-    res.json({
-      success: true,
-      message: 'Password reset email sent',
-      resetUrl // Remove this in production
-    });
+    // Send email
+    try {
+      await emailService.sendPasswordResetEmail(
+        user.email,
+        user.name,
+        resetUrl
+      );
+
+      res.json({
+        success: true,
+        message: 'Password reset email sent successfully. Please check your inbox.'
+      });
+    } catch (emailError) {
+      // If email fails, remove the reset token
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({
+        success: false,
+        message: 'Email could not be sent. Please try again later.'
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,

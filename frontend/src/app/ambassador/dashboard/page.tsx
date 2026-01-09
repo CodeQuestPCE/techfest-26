@@ -9,6 +9,7 @@ import AmbassadorLeaderboard from '@/components/AmbassadorLeaderboard';
 import { ambassadorService } from '@/services/ambassadorService';
 import { LogOut, Home, Copy, Award, Users, TrendingUp, Sparkles, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import MobileMenu from '@/components/MobileMenu';
 
 export default function AmbassadorDashboardPage() {
   const router = useRouter();
@@ -69,6 +70,11 @@ export default function AmbassadorDashboardPage() {
               Logout
             </button>
           </div>
+          <MobileMenu
+            isAuthenticated={isAuthenticated()}
+            userRole={user?.role}
+            onLogout={handleLogout}
+          />
         </nav>
       </header>
 

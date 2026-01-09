@@ -48,3 +48,9 @@ temp/
 # Logs
 logs/
 *.log
+
+# Project Blueprint (Internal Documentation)
+PROJECT_BLUEPRINT.md
+
+# Certificates
+certificates/

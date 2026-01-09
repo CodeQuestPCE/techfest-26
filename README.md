@@ -1,37 +1,25 @@
-# EventHub - College TechFest Management Platform
+# TechFest - Event Management Platform
 
-A comprehensive, production-ready event management platform built with Next.js, Node.js, and MongoDB. **Fully responsive for mobile, tablet, and desktop devices.**
+A comprehensive event management platform for organizing technical festivals and college events.
 
-## ✨ Key Features
+## ✨ Features
 
-- 🎫 **Event Creation & Management** - Create, edit, and manage technical festival events
-- 👥 **User Authentication & Authorization** - Role-based access (Admin, Coordinator, Ambassador, User)
-- 🎟️ **QR Code Registration System** - Automated QR code generation with check-in functionality
-- 📅 **Event Search & Filtering** - Advanced search with category filters
-- 📊 **Admin Dashboard** - Payment verification, registration management, analytics
-- 💳 **Payment Integration** - UPI payment with screenshot upload and manual verification
-- 🎯 **Ambassador Program** - Referral system with leaderboard and rewards
-- 📧 **Email Notifications** - Automated confirmation and update emails
-- 📱 **Fully Responsive Design** - Mobile-first design with hamburger navigation
-- 🔒 **Security Hardened** - JWT authentication, input validation, rate limiting, CORS protection
+- Event creation and management
+- User authentication with role-based access
+- QR code based registration and check-in
+- Event search and filtering
+- Admin dashboard for management
+- Payment verification system
+- Ambassador referral program
+- Email notifications
+- Responsive design for all devices
+- Secure with modern security practices
 
-## Tech Stack
+## Technology
 
-### Frontend
-- Next.js 14 (React 18)
-- TypeScript
-- Tailwind CSS
-- Zustand (State Management)
-- React Query
-- Axios
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB with Mongoose
-- JWT Authentication
-- Bcrypt
-- Multer (File Upload)
+**Frontend:** Next.js, React, TypeScript, Tailwind CSS  
+**Backend:** Node.js, Express, MongoDB  
+**Security:** JWT, bcrypt, rate limiting, input validation
 
 ## Project Structure
 
@@ -45,60 +33,30 @@ A comprehensive, production-ready event management platform built with Next.js, 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- MongoDB 6+
-- npm or yarn
+- NQuick Start
 
-### Installation
+### Prerequisites
+- Node.js 18+
+- MongoDB
+- npm
 
-1. Clone the repository
+### Setup
+
+1. Install dependencies:
 ```bash
-git clone <repository-url>
-cd event-management-platform
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-2. Install dependencies
+2. Configure environment variables in `backend/.env`
+
+3. Start servers:
 ```bash
-# Install root dependencies
-npm install
+# Backend (Terminal 1)
+cd backend && npm start
 
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd ../backend
-npm install
+# Frontend (Terminal 2)
+cd frontend && npm run dev
 ```
 
-3. Set up environment variables
-```bash
-# Copy environment templates
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
-
-4. Configure your environment variables in the `.env` files
-
-5. Start MongoDB
-
-6. Run the development servers
-```bash
-# Terminal 1 - Backend
-cd backend
-npm run dev
-
-# Terminal 2 - Frontend
-cd frontend
-npm run dev
-```
-
-7. Open [http://localhost:3000](http://localhost:3000)
-
-## API Documentation
-
-API documentation is available at `/api/docs` when running the backend server.
-
-## License
-
-MIT
+4. Access at http://localhost:3000

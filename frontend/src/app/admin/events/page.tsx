@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Calendar, Search, Edit, Trash2, Plus, Home, LogOut, Users, MapPin, IndianRupee, Sparkles, Shield } from 'lucide-react';
+import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 export default function AdminEventsPage() {
   const router = useRouter();
@@ -93,7 +94,7 @@ export default function AdminEventsPage() {
             <Shield className="w-8 h-8 text-purple-600" />
             EventHub Admin
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <Link href="/admin/dashboard" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
               Payments
             </Link>
@@ -128,6 +129,7 @@ export default function AdminEventsPage() {
               <LogOut className="w-4 h-4" />
             </button>
           </div>
+          <AdminMobileMenu currentPath="/admin/events" onLogout={() => { logout(); router.push('/'); }} />
         </nav>
       </header>
 

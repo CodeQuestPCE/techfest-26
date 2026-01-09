@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { Calendar, MapPin, Users, IndianRupee, ArrowLeft, Sparkles, Shield, LogOut, Home } from 'lucide-react';
+import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 const eventSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -141,7 +142,7 @@ export default function EditEventPage() {
             <Shield className="w-8 h-8 text-purple-600" />
             EventHub Admin
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <Link href="/admin/dashboard" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
               Payments
             </Link>
@@ -173,6 +174,7 @@ export default function EditEventPage() {
               <LogOut className="w-4 h-4" />
             </button>
           </div>
+          <AdminMobileMenu currentPath="/admin/events" onLogout={handleLogout} />
         </nav>
       </header>
 

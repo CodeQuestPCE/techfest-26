@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Shield, CreditCard, Calendar, Users, UserCircle, BarChart3, FileText, QrCode, Settings, Home, LogOut } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { X } from 'lucide-react';
 
 interface AdminMobileMenuProps {
   currentPath?: string;
@@ -11,128 +12,164 @@ interface AdminMobileMenuProps {
 
 export default function AdminMobileMenu({ currentPath, onLogout }: AdminMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const activePath = currentPath || pathname;
 
-  // Lock body scroll when menu is open
+  // Prevent body scroll when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
+    
+    // Prevent horizontal scroll always
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+    
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.style.overflowX = 'hidden';
+      document.documentElement.style.overflowX = 'hidden';
     };
   }, [isOpen]);
 
-  const closeMenu = () => setIsOpen(false);
+  // Close menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const menuItems = [
-    { href: '/admin/dashboard', label: 'Payments', icon: CreditCard },
-    { href: '/admin/events', label: 'Events', icon: Calendar },
-    { href: '/admin/users', label: 'Users', icon: Users },
-    { href: '/admin/registrations', label: 'Registrations', icon: UserCircle },
-    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-    { href: '/admin/logs', label: 'Logs', icon: FileText },
-    { href: '/admin/scanner', label: 'Scanner', icon: QrCode },
-    { href: '/admin/settings', label: 'Settings', icon: Settings },
+    { href: '/admin/dashboard', label: 'Payments' },
+    { href: '/admin/registrations', label: 'Registrations' },
+    { href: '/admin/users', label: 'Users' },
+    { href: '/admin/events', label: 'Events' },
+    { href: '/admin/scanner', label: 'QR Scanner' },
+    { href: '/admin/logs', label: 'Activity Logs' },
+    { href: '/admin/analytics', label: 'Analytics' },
+    { href: '/admin/settings', label: 'Settings' },
+    { href: '/dashboard', label: 'User Dashboard' },
   ];
 
   return (
     <>
-      {/* Mobile Menu Button - Only visible on mobile */}
+      {/* Hamburger Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden p-2 text-gray-700 hover:text-purple-600 hover:bg-gray-100 rounded-lg transition-colors relative z-50"
-        aria-label="Toggle menu"
         type="button"
+        className="lg:hidden p-2 rounded-lg hover:bg-purple-50 transition-all w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle menu"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          {/* Hamburger Icon */}
+          <i
+            className={`absolute w-full h-[2px] sm:h-[2.5px] transition-all duration-300 ease-in-out ${
+              isOpen
+                ? 'bg-transparent rotate-90'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600'
+            }`}
+            style={{
+              top: '50%',
+              left: 0,
+              transformOrigin: 'center',
+            }}
+          >
+            <span
+              className={`absolute w-full h-[2px] sm:h-[2.5px] bg-white left-1/2 transition-transform duration-300 shadow-md ${
+                isOpen
+                  ? 'rotate-45 -translate-x-1/2 -translate-y-1/2'
+                  : '-translate-x-1/2 -translate-y-[10px] sm:-translate-y-[12px] bg-gradient-to-r from-purple-600 to-pink-600'
+              }`}
+              style={{ transformOrigin: '50% 50%' }}
+            />
+            <span
+              className={`absolute w-full h-[2px] sm:h-[2.5px] bg-white left-1/2 transition-transform duration-300 shadow-md ${
+                isOpen
+                  ? '-rotate-45 -translate-x-1/2 -translate-y-1/2'
+                  : '-translate-x-1/2 translate-y-[10px] sm:translate-y-[12px] bg-gradient-to-r from-purple-600 to-pink-600'
+              }`}
+              style={{ transformOrigin: '50% 50%' }}
+            />
+          </i>
+        </div>
       </button>
 
-      {/* Backdrop Overlay - Higher z-index */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-[60] lg:hidden backdrop-blur-sm"
-          onClick={closeMenu}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Menu Drawer - Highest z-index */}
+      {/* Backdrop Overlay */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 sm:w-80 bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out lg:hidden ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          isOpen ? 'opacity-100 pointer-events-auto z-[60]' : 'opacity-0 pointer-events-none -z-10'
         }`}
-        role="dialog"
-        aria-modal="true"
+        onClick={() => setIsOpen(false)}
+      />
+
+      {/* Slide-out Menu Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-screen w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[35vw] max-w-md transition-all duration-300 ease-in-out lg:hidden overflow-hidden shadow-2xl ${
+          isOpen
+            ? 'translate-x-0 z-[70] pointer-events-auto visible'
+            : 'translate-x-full -z-10 pointer-events-none invisible'
+        }`}
+        style={{
+          background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.98) 0%, rgba(219, 39, 119, 0.98) 100%)',
+        }}
       >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-600 to-pink-600 flex-shrink-0">
-            <div className="flex items-center gap-2 text-white">
-              <Shield className="w-6 h-6" />
-              <span className="font-bold text-lg">Admin Panel</span>
-            </div>
-            <button
-              onClick={closeMenu}
-              className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
-              aria-label="Close menu"
-              type="button"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        {/* Menu Header with Close Button */}
+        <div className="flex items-center justify-between px-4 py-5 border-b border-white/20">
+          <h2 className="text-white text-xl font-bold">Admin Menu</h2>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-2 rounded-lg hover:bg-white/20 transition-all"
+            aria-label="Close menu"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+        </div>
 
-          {/* Menu Items - Scrollable */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-1">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentPath === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={closeMenu}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                      isActive
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Divider */}
-            <div className="my-4 border-t border-gray-200" />
-
-            {/* Additional Actions */}
-            <div className="space-y-1">
-              <Link
-                href="/dashboard"
-                onClick={closeMenu}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+        {/* Menu Items Container */}
+        <div className="h-full w-full pb-6 overflow-y-auto">
+          <ul className="w-full px-4">
+            {menuItems.map((item, index) => (
+              <li
+                key={item.href}
+                className={`list-none transition-all duration-300 ${
+                  isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+                }`}
+                style={{
+                  transitionDelay: isOpen ? `${index * 0.05}s` : '0s',
+                }}
               >
-                <Home className="w-5 h-5 flex-shrink-0" />
-                <span>User Dashboard</span>
-              </Link>
+                <Link
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`block text-left text-white no-underline py-3.5 px-4 my-1 text-base sm:text-lg font-medium rounded-lg transition-all hover:bg-white/20 active:bg-white/30 ${
+                    activePath === item.href ? 'bg-white/25 font-semibold' : ''
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+
+            {/* Logout Button */}
+            <li
+              className={`list-none transition-all duration-300 border-t border-white/30 mt-4 pt-4 ${
+                isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+              }`}
+              style={{
+                transitionDelay: isOpen ? `${menuItems.length * 0.05}s` : '0s',
+              }}
+            >
               <button
                 onClick={() => {
-                  closeMenu();
+                  setIsOpen(false);
                   onLogout();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors"
-                type="button"
+                className="w-full text-left text-white py-3.5 px-4 text-base sm:text-lg font-medium rounded-lg transition-all bg-red-500/20 hover:bg-red-500/40 active:bg-red-500/50"
               >
-                <LogOut className="w-5 h-5 flex-shrink-0" />
-                <span>Logout</span>
+                Logout
               </button>
-            </div>
-          </nav>
+            </li>
+          </ul>
         </div>
       </div>
     </>
