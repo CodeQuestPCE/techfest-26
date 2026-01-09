@@ -1,0 +1,75 @@
+/* Mobile Responsive Enhancements */
+
+/* Ensure all touch targets are at least 44x44px */
+@layer components {
+  .btn-touch {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .nav-touch {
+    @apply py-3 px-4;
+  }
+}
+
+/* Mobile-first table responsiveness */
+@layer utilities {
+  @media (max-width: 768px) {
+    .mobile-table-card {
+      @apply block;
+    }
+    
+    .mobile-table-card tr {
+      @apply block mb-4 bg-white rounded-lg shadow p-4;
+    }
+    
+    .mobile-table-card td {
+      @apply block text-left;
+    }
+    
+    .mobile-table-card td::before {
+      content: attr(data-label);
+      @apply font-semibold inline-block w-32 mr-2;
+    }
+    
+    .mobile-table-card thead {
+      @apply hidden;
+    }
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile menu animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-slide-out {
+  animation: slideOut 0.3s ease-out;
+}

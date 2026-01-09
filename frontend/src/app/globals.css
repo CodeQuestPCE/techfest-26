@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Html5-qrcode Scanner Styles */
+#qr-reader {
+  border: none !important;
+  width: 100% !important;
+}
+
+#qr-reader__dashboard_section {
+  display: block !important;
+  padding: 10px 0 !important;
+}
+
+#qr-reader__dashboard_section_csr {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+#qr-reader__dashboard_section_swaplink {
+  display: none !important;
+}
+
+#qr-reader__camera_selection {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 2px solid #e5e7eb;
+}
+
+#qr-reader__camera_permission_button {
+  background: linear-gradient(to right, #9333ea, #ec4899) !important;
+  color: white !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+#qr-reader video {
+  border-radius: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+#qr-reader__scan_region {
+  border-radius: 12px !important;
+}
+
+#qr-reader__scan_region video {
+  border-radius: 12px !important;
+}
+
+#qr-reader__header_message {
+  display: none !important;
+}
+
+#qr-reader img[alt="Info icon"] {
+  display: none !important;
+}
