@@ -1,10 +1,21 @@
-# TechFest Platform Setup Instructions
+# EventHub TechFest Platform Setup Instructions
+
+**Repository**: [github.com/CodeQuestPCE/techfest-26](https://github.com/CodeQuestPCE/techfest-26)  
+**Status**: Production Ready - Fully responsive design
 
 ## Prerequisites
 
 - Node.js 18+
 - MongoDB 6+
 - npm or yarn
+- Git
+
+## Clone Repository
+
+```bash
+git clone https://github.com/CodeQuestPCE/techfest-26.git
+cd techfest-26
+```
 
 ## Backend Setup
 

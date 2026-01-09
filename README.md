@@ -1,17 +1,19 @@
-# Event Management Platform
+# EventHub - College TechFest Management Platform
 
-A comprehensive event management platform built with Next.js, Node.js, and MongoDB.
+A comprehensive, production-ready event management platform built with Next.js, Node.js, and MongoDB. **Fully responsive for mobile, tablet, and desktop devices.**
 
-## Features
+## ✨ Key Features
 
-- 🎫 Event Creation & Management
-- 👥 User Authentication & Authorization
-- 🎟️ Ticket Booking & QR Code Generation
-- 📅 Event Calendar & Search
-- 📊 Admin Dashboard
-- 💳 Payment Integration
-- 📧 Email Notifications
-- 📱 Responsive Design
+- 🎫 **Event Creation & Management** - Create, edit, and manage technical festival events
+- 👥 **User Authentication & Authorization** - Role-based access (Admin, Coordinator, Ambassador, User)
+- 🎟️ **QR Code Registration System** - Automated QR code generation with check-in functionality
+- 📅 **Event Search & Filtering** - Advanced search with category filters
+- 📊 **Admin Dashboard** - Payment verification, registration management, analytics
+- 💳 **Payment Integration** - UPI payment with screenshot upload and manual verification
+- 🎯 **Ambassador Program** - Referral system with leaderboard and rewards
+- 📧 **Email Notifications** - Automated confirmation and update emails
+- 📱 **Fully Responsive Design** - Mobile-first design with hamburger navigation
+- 🔒 **Security Hardened** - JWT authentication, input validation, rate limiting, CORS protection
 
 ## Tech Stack
 

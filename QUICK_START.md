@@ -1,6 +1,10 @@
-# 🚀 QUICK START GUIDE - TechFest Platform
+# 🚀 QUICK START GUIDE - EventHub TechFest Platform
 
 ## ✅ COMPLETE PROJECT SETUP (5 MINUTES)
+
+**Project Repository**: [github.com/CodeQuestPCE/techfest-26](https://github.com/CodeQuestPCE/techfest-26)
+
+**Status**: Production Ready - Fully responsive for mobile, tablet, and desktop 📱💻
 
 ---
 

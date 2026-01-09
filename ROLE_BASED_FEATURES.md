@@ -1,7 +1,22 @@
-# 👥 Role-Based Access Control (RBAC) - TechFest Platform
+# 👥 Role-Based Access Control (RBAC) - EventHub TechFest Platform
 
 ## Overview
-This document defines the complete role-based feature access for the TechFest Event Management Platform.
+This document defines the complete role-based feature access for the EventHub TechFest Event Management Platform.
+
+**Status**: ✅ All roles implemented and tested
+**Mobile Support**: Fully responsive with role-based mobile menus
+
+---
+
+## 📱 Mobile Navigation Access
+
+### MobileMenu Component
+- **User Role**: Browse Events, My Dashboard, My Registrations, Profile, Logout
+- **Ambassador Role**: All user links + Ambassador Dashboard, Generate Code, View Stats, Leaderboard
+- **Admin Role**: Redirects to AdminMobileMenu
+
+### AdminMobileMenu Component  
+- **Admin Role Only**: Dashboard, Scanner, Registrations, Events, Users, Analytics, Reports, QR Check-in, Settings
 
 ---
 

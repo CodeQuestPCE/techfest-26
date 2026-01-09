@@ -1,4 +1,7 @@
-# 🔒 Security Guide for Event Management System
+# 🔒 Security Guide for EventHub Management System
+
+**Status**: ✅ Production-ready security implementation  
+**Repository**: [github.com/CodeQuestPCE/techfest-26](https://github.com/CodeQuestPCE/techfest-26)
 
 ## ✅ Implemented Security Measures
 

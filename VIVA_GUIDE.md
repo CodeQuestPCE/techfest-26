@@ -1,10 +1,47 @@
-# 🎓 VIVA PREPARATION GUIDE - TechFest Platform
+# 🎓 VIVA PREPARATION GUIDE - EventHub TechFest Platform
 
 ## Quick Overview
-**Project**: Event Management Platform for College TechFest  
+**Project**: EventHub - Event Management Platform for College TechFest  
 **Stack**: MERN (MongoDB, Express.js, React, Node.js)  
-**Architecture**: Monolithic Backend + React Frontend  
-**Key Innovation**: Manual Payment Verification System
+**Architecture**: Monolithic Backend + Next.js Frontend  
+**Key Innovation**: Manual Payment Verification System  
+**Special Features**: Fully responsive design, Mobile menus, QR system, Ambassador program
+
+**Repository**: [github.com/CodeQuestPCE/techfest-26](https://github.com/CodeQuestPCE/techfest-26)
+
+---
+
+## 🆕 RESPONSIVE DESIGN QUESTIONS
+
+### 1. How did you make the platform mobile-friendly?
+**Answer**: 
+- **Mobile-first approach** with Tailwind CSS breakpoints
+- Custom **MobileMenu** and **AdminMobileMenu** components with hamburger navigation
+- **Responsive grids**: 1 column (mobile) → 2 columns (tablet) → 3-4 columns (desktop)
+- **Typography scaling**: text-4xl → text-7xl across breakpoints
+- **Touch-friendly**: Minimum 48px tap targets throughout
+- **Body scroll lock**: Prevents background scrolling when mobile menu open
+- **Z-index layering**: Button (z-50), Backdrop (z-[60]), Drawer (z-[70])
+
+### 2. What are the breakpoints you used?
+**Answer**: 
+- **sm**: 640px (Small tablets)
+- **md**: 768px (Tablets)  
+- **lg**: 1024px (Desktop - main mobile/desktop switch)
+- **xl**: 1280px (Large desktop)
+- **2xl**: 1536px (Extra large)
+
+At 1024px (lg), desktop navigation shows and mobile menu hides.
+
+### 3. How does the mobile menu work?
+**Answer**:
+- Slide-in drawer animation from right with `translate-x-full` to `translate-x-0`
+- Backdrop overlay with blur effect (`bg-black/60 backdrop-blur-sm`)
+- **Body scroll lock** using `useEffect` to prevent background scrolling
+- Role-based menu items (different for user, ambassador, admin)
+- Smooth animations with `duration-300 ease-in-out`
+- Auto-closes on link click with `closeMenu()` function
+- ARIA attributes for accessibility
 
 ---
 
