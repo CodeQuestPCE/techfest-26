@@ -7,6 +7,7 @@ import { eventService } from '@/services/eventService';
 import { useAuthStore } from '@/store/authStore';
 import ManualPaymentForm from '@/components/ManualPaymentForm';
 import { Sparkles, LogOut, ArrowLeft } from 'lucide-react';
+import MobileMenu from '@/components/MobileMenu';
 
 export default function EventRegisterPage() {
   const params = useParams();
@@ -60,11 +61,13 @@ export default function EventRegisterPage() {
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
-            <Sparkles className="w-8 h-8 text-purple-600" />
+          <Link href="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             EventHub
           </Link>
-          <div className="flex items-center gap-6">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-6">
             <Link href="/events" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
               Browse Events
             </Link>
@@ -94,9 +97,16 @@ export default function EventRegisterPage() {
               Logout
             </button>
           </div>
-        </nav>
-      </header>
 
+          {/* Mobile Navigation */}6 sm:py-8 max-w-4xl">
+        <Link href={`/events/${eventId}`} className="inline-flex items-center gap-2 text-purple-600 hover:text-pink-600 mb-4 sm:mb-6 font-semibold transition-colors">
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          Back to event
+        </Link>
+
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 lg:p-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 sm:mb-3">Register for Event</h1>
+          <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Link href={`/events/${eventId}`} className="inline-flex items-center gap-2 text-purple-600 hover:text-pink-600 mb-6 font-semibold transition-colors">
           <ArrowLeft className="w-5 h-5" />

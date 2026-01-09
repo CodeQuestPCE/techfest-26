@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { Calendar, MapPin, Users, IndianRupee, ArrowLeft, Sparkles, Shield, LogOut } from 'lucide-react';
+import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 const eventSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -104,11 +105,13 @@ export default function CreateEventPage() {
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
-            <Sparkles className="w-8 h-8 text-purple-600" />
+          <Link href="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             EventHub
           </Link>
-          <div className="flex items-center gap-6">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-6">
             <Link href="/events" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
               Browse Events
             </Link>
@@ -133,6 +136,18 @@ export default function CreateEventPage() {
               Logout
             </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {user?.role === 'admin' ? (
+            <AdminMobileMenu currentPath="/create-event" onLogout={handleLogout} />
+          ) : (
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="lg:hidden p-2 text-gray-700 hover:text-purple-600 rounded-lg"
+            >
+              Menu
+            </button>
+          )}
         </nav>
       </header>
 
@@ -143,18 +158,18 @@ export default function CreateEventPage() {
         </Link>
 
         {/* Welcome Banner */}
-        <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden">
+        <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 mb-6 sm:mb-8 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="relative">
-            <h1 className="text-4xl font-extrabold text-white mb-2 flex items-center gap-3">
-              <Sparkles className="w-10 h-10" />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 flex items-center gap-2 sm:gap-3">
+              <Sparkles className="w-8 h-8 sm:w-10 sm:h-10" />
               Create New Event
             </h1>
-            <p className="text-white/90 text-lg">Fill in the details to launch an amazing event 🚀</p>
+            <p className="text-white/90 text-base sm:text-lg">Fill in the details to launch an amazing event 🚀</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8">
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}

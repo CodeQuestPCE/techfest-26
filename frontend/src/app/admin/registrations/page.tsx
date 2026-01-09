@@ -232,22 +232,24 @@ export default function AdminRegistrationsPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">User</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Event</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Check-in</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Amount</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredRegistrations?.map((reg: any) => (
-                    <tr key={reg._id} className="hover:bg-gray-50">
+            <>
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">User</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Event</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Check-in</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Amount</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredRegistrations?.map((reg: any) => (
+                      <tr key={reg._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div>
                           <div className="font-medium text-gray-900">{reg.user?.name}</div>
@@ -291,9 +293,67 @@ export default function AdminRegistrationsPage() {
                         {new Date(reg.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="lg:hidden divide-y divide-gray-200">
+                {filteredRegistrations?.map((reg: any) => (
+                  <div key={reg._id} className="p-4 hover:bg-gray-50">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{reg.user?.name}</div>
+                          <div className="text-sm text-gray-500">{reg.user?.email}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(reg.status)}
+                          <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(reg.status)}`}>
+                            {reg.status}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm">
+                        <div className="font-medium text-gray-900">{reg.event?.title}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="inline-flex px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                            {reg.registrationType}
+                          </span>
+                        </div>
+                      </div>
+
+                      {reg.checkInStatus ? (
+                        <div className="flex items-center gap-2 text-green-600 text-sm">
+                          <CheckCircle className="w-4 h-4" />
+                          <div>
+                            <div className="font-medium">Checked in</div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(reg.checkInTime).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <XCircle className="w-4 h-4" />
+                          <span>Not checked in</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <div className="text-sm text-gray-600">
+                          ₹{reg.event?.registrationFee || 0}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(reg.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               {filteredRegistrations?.length === 0 && (
                 <div className="text-center py-12">
@@ -301,7 +361,7 @@ export default function AdminRegistrationsPage() {
                   <p className="text-gray-600">No registrations found</p>
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
 

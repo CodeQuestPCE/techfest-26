@@ -183,22 +183,24 @@ export default function AdminUsersPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">College</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Role</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Points</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Joined</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredUsers?.map((u: any) => (
-                    <tr key={u._id} className="hover:bg-gray-50">
+            <>
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">College</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Role</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Points</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Joined</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredUsers?.map((u: any) => (
+                      <tr key={u._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{u.name}</div>
                       </td>
@@ -242,9 +244,68 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="lg:hidden divide-y divide-gray-200">
+                {filteredUsers?.map((u: any) => (
+                  <div key={u._id} className="p-4 hover:bg-gray-50">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{u.name}</div>
+                          <div className="text-sm text-gray-500">{u.email}</div>
+                          {u.college && (
+                            <div className="text-xs text-gray-400 mt-1">{u.college}</div>
+                          )}
+                        </div>
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold shrink-0 ${
+                          u.role === 'admin' ? 'bg-red-100 text-red-800' :
+                          u.role === 'coordinator' ? 'bg-blue-100 text-blue-800' :
+                          u.role === 'ambassador' ? 'bg-purple-100 text-purple-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <div className="text-sm text-gray-600">
+                          <span className="font-medium">{u.points || 0}</span> points
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(u.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-2">
+                        <button
+                          onClick={() => {
+                            setSelectedUser(u);
+                            setNewRole(u.role);
+                            setShowRoleModal(true);
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
+                        >
+                          <Shield className="w-4 h-4" />
+                          Change Role
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u._id, u.name)}
+                          disabled={u._id === user?.id}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               {filteredUsers?.length === 0 && (
                 <div className="text-center py-12">
@@ -252,7 +313,7 @@ export default function AdminUsersPage() {
                   <p className="text-gray-600">No users found</p>
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
 
