@@ -27,15 +27,9 @@ exports.getLeaderboard = async (req, res) => {
 // @desc    Get ambassador stats
 exports.getAmbassadorStats = async (req, res) => {
   try {
+    // User is already authenticated and authorized as ambassador by middleware
     const user = await User.findById(req.user.id)
-      .select('name email points referralCode');
-
-    if (user.role !== 'ambassador') {
-      return res.status(403).json({
-        success: false,
-        message: 'Only ambassadors can access this'
-      });
-    }
+      .select('name email points referralCode role');
 
     // Get referred users
     const referredUsers = await User.countDocuments({ referredBy: req.user.id });

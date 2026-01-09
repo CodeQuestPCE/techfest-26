@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import AmbassadorLeaderboard from '@/components/AmbassadorLeaderboard';
 import { ambassadorService } from '@/services/ambassadorService';
@@ -13,12 +13,29 @@ import MobileMenu from '@/components/MobileMenu';
 
 export default function AmbassadorDashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, updateUser } = useAuthStore();
 
-  const { data: stats } = useQuery<any>({
+  const { data: stats, refetch: refetchStats } = useQuery<any>({
     queryKey: ['ambassador-stats'],
     queryFn: ambassadorService.getAmbassadorStats,
     enabled: isAuthenticated() && user?.role === 'ambassador',
+  });
+
+  // Auto-generate referral code if not present
+  const { mutate: generateCode, isPending: isGenerating } = useMutation({
+    mutationFn: ambassadorService.generateReferralCode,
+    onSuccess: (response) => {
+      const newCode = response.data.referralCode;
+      // Update user in auth store with new referral code
+      if (user) {
+        updateUser({ ...user, referralCode: newCode });
+      }
+      toast.success('Referral code generated successfully!');
+      refetchStats();
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to generate referral code');
+    },
   });
 
   useEffect(() => {
@@ -26,6 +43,13 @@ export default function AmbassadorDashboardPage() {
       router.push('/login');
     }
   }, [isAuthenticated, user, router]);
+
+  // Auto-generate referral code on first visit if not present
+  useEffect(() => {
+    if (isAuthenticated() && user?.role === 'ambassador' && !user?.referralCode && !isGenerating) {
+      generateCode();
+    }
+  }, [user?.referralCode, user?.role, isAuthenticated, isGenerating]);
 
   if (!isAuthenticated() || user?.role !== 'ambassador') {
     return null;
@@ -54,7 +78,7 @@ export default function AmbassadorDashboardPage() {
             <Star className="w-8 h-8 text-purple-600" />
             EventHub Ambassador
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <Link href="/dashboard" className="flex items-center gap-2 text-gray-700 hover:text-primary-600">
               <Home className="w-4 h-4" />
               My Dashboard
@@ -103,7 +127,9 @@ export default function AmbassadorDashboardPage() {
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border-2 border-white/30">
-                  <code className="text-3xl font-mono font-bold tracking-wider">{user?.referralCode || 'Generating...'}</code>
+                  <code className="text-3xl font-mono font-bold tracking-wider">
+                    {isGenerating ? 'Generating...' : (user?.referralCode || 'Loading...')}
+                  </code>
                 </div>
               </div>
               <button

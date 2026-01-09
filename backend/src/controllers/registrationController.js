@@ -9,7 +9,54 @@ const emailService = require('../utils/emailService');
 // @desc    Create registration with manual payment
 exports.createRegistration = async (req, res) => {
   try {
-    const { eventId, ticketType, quantity, attendeeInfo, teamName, teamMembers, utrNumber } = req.body;
+    console.log('Registration request body:', req.body);
+    console.log('Uploaded file:', req.file);
+    
+    let { eventId, ticketType, quantity, attendeeInfo, teamName, teamMembers, utrNumber } = req.body;
+
+    // Parse teamMembers if it's a JSON string
+    if (typeof teamMembers === 'string') {
+      try {
+        teamMembers = JSON.parse(teamMembers);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid team members format'
+        });
+      }
+    }
+
+    // Convert quantity to number
+    quantity = parseInt(quantity, 10);
+
+    // Validate required fields
+    if (!eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Event ID is required'
+      });
+    }
+
+    if (!ticketType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ticket type is required'
+      });
+    }
+
+    if (!quantity || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid quantity is required'
+      });
+    }
+
+    if (!utrNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'UTR number is required'
+      });
+    }
 
     // Get the uploaded file path
     const paymentScreenshotUrl = req.file ? `/uploads/${req.file.filename}` : null;
@@ -58,22 +105,27 @@ exports.createRegistration = async (req, res) => {
     if (utrNumber) {
       const existingUTR = await Registration.findOne({ utrNumber });
       if (existingUTR) {
+        console.log('UTR already exists:', utrNumber);
         return res.status(400).json({
           success: false,
-          message: 'UTR number already used'
+          message: 'UTR number already used. Please use a different UTR number.'
         });
       }
     }
 
     // Validate team size for team events
     if (event.eventType === 'team') {
+      console.log('Team validation - minSize:', event.minTeamSize, 'maxSize:', event.maxTeamSize, 'teamMembers:', teamMembers?.length);
       if (!teamName || !teamMembers || teamMembers.length < event.minTeamSize || teamMembers.length > event.maxTeamSize) {
+        console.log('Team size validation failed');
         return res.status(400).json({
           success: false,
           message: `Team size must be between ${event.minTeamSize} and ${event.maxTeamSize}`
         });
       }
     }
+
+    console.log('All validations passed, creating registration...');
 
     const totalAmount = ticket.price * quantity;
 
@@ -93,7 +145,7 @@ exports.createRegistration = async (req, res) => {
       paymentStatus: 'pending'
     });
 
-    // Temporarily reserve tickets (don't increment registeredCount yet - only on approval)
+    // Reserve tickets AFTER successful registration creation
     ticket.available -= quantity;
     await event.save();
 
@@ -107,9 +159,10 @@ exports.createRegistration = async (req, res) => {
       data: registration
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Registration failed'
     });
   }
 };

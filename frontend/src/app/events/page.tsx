@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -13,8 +13,13 @@ export default function EventsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['events', searchTerm, categoryFilter],
@@ -111,7 +116,7 @@ export default function EventsPage() {
             >
               Events
             </Link>
-            {isAuthenticated() ? (
+            {isMounted && isAuthenticated() ? (
               <>
                 <Link href="/dashboard" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
                   Dashboard

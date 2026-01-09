@@ -91,7 +91,7 @@ export default function LoginPage() {
             EventHub
           </Link>
           <div className="hidden lg:flex gap-4">
-            {isAuthenticated() ? (
+            {mounted && isAuthenticated() ? (
               <>
                 <Link
                   href="/dashboard"

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -13,7 +14,12 @@ export default function EventDetailPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
   const eventId = params.id as string;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'TBA';

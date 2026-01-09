@@ -13,11 +13,17 @@ export default function HomePage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cursorVariant, setCursorVariant] = useState('default');
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Set mounted state on client side only to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Cursor tracking effect
   useEffect(() => {
@@ -112,7 +118,7 @@ export default function HomePage() {
           
           {/* Desktop Navigation */}
           <div className="hidden lg:flex gap-4">
-            {isAuthenticated() ? (
+            {isMounted && isAuthenticated() ? (
               <>
                 <Link
                   href="/events"

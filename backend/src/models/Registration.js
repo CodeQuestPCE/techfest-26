@@ -16,8 +16,18 @@ const registrationSchema = new mongoose.Schema({
     trim: true
   },
   teamMembers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    },
+    phone: {
+      type: String,
+      required: true
+    }
   }],
   ticketType: {
     type: String,
