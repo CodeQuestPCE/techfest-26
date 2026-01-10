@@ -170,22 +170,6 @@ app.use('/api/logs', require('./routes/logs'));
 
 app.use('/api/settings', require('./routes/settings'));
 
-// Serve static frontend files (must be after API routes)
-const frontendPath = path.join(__dirname, '../../frontend/out');
-app.use(express.static(frontendPath));
-
-// Handle client-side routing - send all non-API requests to index.html
-app.get('*', (req, res) => {
-  // Don't handle API routes here
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({
-      success: false,
-      message: 'API route not found'
-    });
-  }
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
-
 // Health check with caching
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
@@ -205,6 +189,17 @@ app.use((err, req, res, next) => {
     message: err.message || 'Internal Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
+});
+
+// 404 handler for API routes only
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({
+      success: false,
+      message: 'API route not found'
+    });
+  }
+  res.status(404).send('Not Found');
 });
 
 const PORT = process.env.PORT || 5000;

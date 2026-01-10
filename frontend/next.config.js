@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static export for single service deployment
-  output: 'export',
+  // Use standalone output for single service deployment
+  output: 'standalone',
   
-  // Disable image optimization for static export
+  // Image optimization
   images: {
-    unoptimized: true,
+    domains: ['localhost'],
+    formats: ['image/avif', 'image/webp'],
   },
 
   // Compiler optimizations
@@ -21,9 +22,6 @@ const nextConfig = {
   
   // Production optimization
   compress: true,
-  
-  // Trailing slash for static export
-  trailingSlash: true,
   
   // Security headers
   async headers() {

@@ -1,6 +1,12 @@
-# 🚀 Single Service Deployment Guide - Render.com
+# 🚀 Deployment Guide - Render.com
 
-This guide will help you deploy both frontend and backend as a **single service** on Render.com (Free Tier).
+**⚠️ Important Update**: Due to dynamic admin routes, this app requires **TWO separate services** on Render (both free tier):
+1. **Backend Service** (API)
+2. **Frontend Service** (Next.js)
+
+Both services will fit within the free tier (750 hours/month) thanks to auto-sleep.
+
+---
 
 ## 📋 Prerequisites
 
@@ -12,165 +18,148 @@ This guide will help you deploy both frontend and backend as a **single service*
 
 ## 🎯 Deployment Steps
 
-### Step 1: Create Web Service on Render
+### Part 1: Deploy Backend API
+
+#### Step 1: Create Backend Web Service
 
 1. Go to [Render Dashboard](https://dashboard.render.com/)
 2. Click **"New +"** → **"Web Service"**
 3. Connect your GitHub repository: `CodeQuestPCE/techfest-26`
-4. Configure the service:
 
-#### Basic Settings:
-- **Name**: `eventhub` (or your preferred name)
+#### Step 2: Configure Backend Service
+
+**Basic Settings:**
+- **Name**: `eventhub-api`
 - **Region**: Singapore (or closest to your users)
 - **Branch**: `main`
 - **Root Directory**: `backend`
 - **Runtime**: Node
-- **Build Command**: `npm install && npm run build`
+- **Build Command**: `npm install`
 - **Start Command**: `npm start`
+- **Instance Type**: Free
 
-#### Instance Type:
-- **Free** (512MB RAM, auto-sleeps after 15min inactivity)
-
-### Step 2: Configure Environment Variables
-
-Click **"Environment"** tab and add these variables:
+#### Step 3: Backend Environment Variables
 
 ```
 NODE_ENV=production
 PORT=10000
 MONGODB_URI=mongodb+srv://pcodequest_db_user:77bMpfvwdLVvvX6I@cluster0.kqofxwn.mongodb.net/eventhub?retryWrites=true&w=majority
-JWT_SECRET=your_super_secure_jwt_secret_key_12345
+JWT_SECRET=7ca5f9fad10e2f7ed457314381df59d165488d12a98ae423629326f6ac349846ce9b3ac82684f53a2e3cb9499c7a8bf47f1aa5333f330abe4c41f0f1e48b5fb7
 JWT_EXPIRE=30d
 ```
 
-**⚠️ Important**: Generate a strong JWT_SECRET using:
-```bash
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+Wait for it to deploy, then **copy the backend URL** (e.g., `https://eventhub-api.onrender.com`)
+
+---
+
+### Part 2: Deploy Frontend
+
+#### Step 4: Create Frontend Web Service
+
+1. Click **"New +"** → **"Web Service"**
+2. Connect same repository: `CodeQuestPCE/techfest-26`
+
+#### Step 5: Configure Frontend Service
+
+**Basic Settings:**
+- **Name**: `eventhub-frontend`
+- **Region**: Singapore (same as backend)
+- **Branch**: `main`
+- **Root Directory**: `frontend`
+- **Runtime**: Node
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm start`
+- **Instance Type**: Free
+
+#### Step 6: Frontend Environment Variables
+
+```
+NODE_ENV=production
+NEXT_PUBLIC_API_URL=https://eventhub-api.onrender.com/api
 ```
 
-After deployment, add:
-```
-FRONTEND_URL=https://your-app-name.onrender.com
-```
+**⚠️ Replace** `eventhub-api.onrender.com` with your actual backend URL from Step 3!
 
-### Step 3: Deploy
+---
 
-1. Click **"Create Web Service"**
-2. Wait for build to complete (5-10 minutes for first deployment)
-3. Once deployed, you'll get a URL like: `https://eventhub.onrender.com`
+### Part 3: Update Backend CORS
 
-### Step 4: Update FRONTEND_URL
+#### Step 7: Add Frontend URL to Backend
 
-1. Go to your service's **Environment** variables
-2. Add/Update: `FRONTEND_URL=https://your-actual-url.onrender.com`
-3. Service will auto-redeploy
+1. Go back to **Backend Service** → **Environment** tab
+2. Add new variable:
+   ```
+   FRONTEND_URL=https://eventhub-frontend.onrender.com
+   ```
+3. **Replace** with your actual frontend URL
+4. Service will auto-redeploy
 
-### Step 5: Verify MongoDB Network Access
+---
+
+### Step 8: Verify MongoDB Network Access
 
 1. Go to [MongoDB Atlas](https://cloud.mongodb.com/)
 2. Click **"Network Access"** (left sidebar)
-3. Ensure `0.0.0.0/0` is in the IP Access List
-4. If not, click **"Add IP Address"** → **"Allow Access from Anywhere"**
+3. Ensure `0.0.0.0/0` is in IP Access List
+4. If not: **"Add IP Address"** → **"Allow Access from Anywhere"**
 
 ---
 
 ## ✅ Testing Your Deployment
 
-Visit your Render URL: `https://your-app.onrender.com`
+**Frontend URL**: `https://eventhub-frontend.onrender.com`
 
 **Test Checklist:**
-- ✅ Homepage loads correctly
+- ✅ Homepage loads
 - ✅ Login/Register works
-- ✅ Events display properly
-- ✅ Registration system functions
+- ✅ Events display
+- ✅ Registration system works
 - ✅ Admin panel accessible
-- ✅ QR code scanner works
+- ✅ QR scanner works
 
 ---
 
-## 🔍 Monitoring & Troubleshooting
+## 🔍 Troubleshooting
 
 ### View Logs:
-1. Go to Render Dashboard → Your Service
-2. Click **"Logs"** tab
-3. Check for errors during startup or runtime
+Dashboard → Your Service → **Logs** tab
 
 ### Common Issues:
 
-#### 1. Service not starting:
-- Check build logs for errors
-- Verify all environment variables are set
-- Ensure MongoDB URI is correct
+**1. API requests failing:**
+- Verify `NEXT_PUBLIC_API_URL` points to backend URL with `/api`
+- Check backend CORS includes frontend URL
+- Ensure MongoDB connection is working
 
-#### 2. Frontend not loading:
-- Check if build completed successfully
-- Verify `frontend/out` directory was created
-- Check browser console for errors
+**2. First load is slow:**
+- Normal! Free tier sleeps after 15min
+- First request takes ~30-60 seconds
+- Keep services alive with uptime monitors (optional)
 
-#### 3. API requests failing:
-- Ensure API routes start with `/api/`
-- Check CORS configuration
-- Verify MongoDB connection
-
-#### 4. First request is slow:
-- Normal! Free tier services sleep after 15min inactivity
-- First request wakes the service (takes ~30-60 seconds)
-- Subsequent requests are fast
+**3. CORS errors:**
+- Verify `FRONTEND_URL` in backend matches your frontend URL
+- Check browser console for specific errors
 
 ---
 
-## 🎨 What Changed for Single Service?
+## 💰 Free Tier Resources
 
-### Frontend (Next.js):
-✅ Configured for static export (`output: 'export'`)
-✅ API calls use relative paths (`/api`)
-✅ Images use `unoptimized: true`
-✅ Builds to `frontend/out` directory
+**Per Service:**
+- 750 hours/month (shared across all free services)
+- 512MB RAM
+- Auto-sleep after 15min inactivity
+- 100GB bandwidth/month
 
-### Backend (Express):
-✅ Serves static files from `frontend/out`
-✅ Handles client-side routing
-✅ All API routes prefixed with `/api/`
-✅ Build script includes frontend build
-
----
-
-## 💰 Free Tier Limits
-
-- **Hours**: 750 hours/month per account (one service = plenty of headroom)
-- **RAM**: 512MB
-- **Auto-sleep**: After 15 minutes of inactivity
-- **Wake time**: ~30-60 seconds on first request
-- **Bandwidth**: 100GB/month
-- **Build time**: 500 hours/month
-
-**Pro Tip**: Free tier is perfect for:
-- Development/testing
-- Low-traffic applications
-- College events (moderate traffic)
+**Two Services Total:**
+- Still fits in free tier with auto-sleep
+- ~375 hours each if evenly distributed
+- More than enough for college events
 
 ---
 
-## 🔐 Security Checklist
+## 🎉 Success!
 
-- ✅ Strong JWT_SECRET generated
-- ✅ MongoDB Atlas network access configured
-- ✅ Environment variables set (never commit `.env`)
-- ✅ CORS configured with production URL
-- ✅ HTTPS enabled (automatic on Render)
+**Frontend**: `https://eventhub-frontend.onrender.com`
+**Backend**: `https://eventhub-api.onrender.com`
 
----
-
-## 📞 Need Help?
-
-**Render Logs**: Dashboard → Service → Logs
-**MongoDB Logs**: Atlas Dashboard → Database → Monitoring
-**GitHub**: Check your repository for code issues
-
----
-
-## 🎉 Congratulations!
-
-Your EventHub application is now live on: `https://your-app.onrender.com`
-
-**Note**: First request after sleep takes ~30-60 seconds. Keep this in mind when sharing the link!
+Both services are live and connected!
