@@ -101,6 +101,19 @@ exports.createRegistration = async (req, res) => {
       });
     }
 
+    // Check if user already registered for this event
+    const existingRegistration = await Registration.findOne({ 
+      event: eventId, 
+      user: req.user.id 
+    });
+    if (existingRegistration) {
+      console.log('User already registered for this event');
+      return res.status(400).json({
+        success: false,
+        message: 'You have already registered for this event. You can only register once per event.'
+      });
+    }
+
     // Check if UTR already exists
     if (utrNumber) {
       const existingUTR = await Registration.findOne({ utrNumber });
@@ -171,7 +184,8 @@ exports.createRegistration = async (req, res) => {
 exports.getUserRegistrations = async (req, res) => {
   try {
     const registrations = await Registration.find({ user: req.user.id })
-      .populate('event', 'title startDate endDate location')
+      .populate('event', 'title startDate endDate location eventType')
+      .populate('user', 'name email phone')
       .sort({ registeredAt: -1 });
 
     res.json({

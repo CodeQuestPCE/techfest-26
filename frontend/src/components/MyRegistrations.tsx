@@ -50,9 +50,14 @@ export default function MyRegistrations() {
             <div key={registration._id} className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-xl font-semibold">
-                    {registration.event?.title || 'Event'}
-                  </h3>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="text-xl font-semibold">
+                      {registration.event?.title || 'Event'}
+                    </h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${registration.event?.eventType === 'team' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                      {registration.event?.eventType === 'team' ? '👥 Team' : '👤 Solo'}
+                    </span>
+                  </div>
                   <p className="text-gray-600 text-sm">
                     {registration.event?.startDate 
                       ? new Date(registration.event.startDate).toLocaleDateString()
@@ -61,6 +66,15 @@ export default function MyRegistrations() {
                 </div>
                 {getStatusBadge(registration.status)}
               </div>
+
+              {registration.teamName && (
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-purple-700 font-semibold mb-1 flex items-center gap-2">
+                    👑 You are the Team Leader
+                  </p>
+                  <p className="text-lg font-bold text-gray-900">{String(registration.teamName)}</p>
+                </div>
+              )}
 
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
@@ -71,12 +85,6 @@ export default function MyRegistrations() {
                   <p className="text-sm text-gray-600">Amount Paid</p>
                   <p className="font-medium">₹{registration.totalAmount || 0}</p>
                 </div>
-                {registration.teamName && (
-                  <div>
-                    <p className="text-sm text-gray-600">Team Name</p>
-                    <p className="font-medium">{String(registration.teamName)}</p>
-                  </div>
-                )}
                 {registration.utrNumber && (
                   <div>
                     <p className="text-sm text-gray-600">UTR Number</p>
@@ -84,6 +92,38 @@ export default function MyRegistrations() {
                   </div>
                 )}
               </div>
+
+              {registration.teamMembers && registration.teamMembers.length > 0 && (
+                <div className="border-t pt-4 mb-4">
+                  <p className="font-semibold mb-3 text-gray-900">Team Members ({registration.teamMembers.length + 1}):</p>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {/* Team Leader (You) */}
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border-2 border-purple-300">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                          👑
+                        </span>
+                        <span className="font-semibold text-gray-900">{registration.user?.name || 'You'} (Leader)</span>
+                      </div>
+                      <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email}</p>
+                      <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone}</p>
+                    </div>
+                    {/* Other Team Members */}
+                    {registration.teamMembers.map((member: any, idx: number) => (
+                      <div key={idx} className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                            {idx + 2}
+                          </span>
+                          <span className="font-semibold text-gray-900">{member.name}</span>
+                        </div>
+                        <p className="text-xs text-gray-600 ml-8">📧 {member.email}</p>
+                        <p className="text-xs text-gray-600 ml-8">📱 {member.phone}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {registration.status === 'verified' && registration.qrCodeHash && (
                 <div className="border-t pt-4 mt-4">

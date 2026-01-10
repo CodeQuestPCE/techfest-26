@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Upload, X, Plus, Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 const registrationSchema = z.object({
   utrNumber: z.string().min(12, 'UTR must be at least 12 characters'),
@@ -17,12 +18,24 @@ const registrationSchema = z.object({
 
 export default function ManualPaymentForm({ event }: { event: any }) {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [teamMembers, setTeamMembers] = useState<Array<{ name: string; email: string; phone: string }>>([
     { name: '', email: '', phone: '' },
   ]);
+
+  // Auto-populate first team member with logged-in user details for team events
+  useEffect(() => {
+    if (event.eventType === 'team' && user) {
+      setTeamMembers([{
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || ''
+      }]);
+    }
+  }, [event.eventType, user]);
 
   // Fetch global payment settings
   const { data: paymentSettings } = useQuery({
@@ -243,10 +256,10 @@ export default function ManualPaymentForm({ event }: { event: any }) {
             </div>
             <div className="space-y-4">
               {teamMembers.map((member, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg relative">
+                <div key={index} className={`p-4 rounded-lg relative ${index === 0 ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200' : 'bg-gray-50'}`}>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium text-sm">Member {index + 1}</span>
-                    {teamMembers.length > 1 && (
+                    <span className="font-medium text-sm">{index === 0 ? '👑 Team Leader' : `Member ${index + 1}`}</span>
+                    {teamMembers.length > 1 && index > 0 && (
                       <button
                         type="button"
                         onClick={() => removeTeamMember(index)}

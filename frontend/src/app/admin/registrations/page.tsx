@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import AdminMobileMenu from '@/components/AdminMobileMenu';
-import { Users, Search, Filter, Download, Home, LogOut, Calendar, CheckCircle, Clock, XCircle, Shield, Sparkles } from 'lucide-react';
+import { Users, Search, Filter, Download, Home, LogOut, Calendar, CheckCircle, Clock, XCircle, Shield, Sparkles, X } from 'lucide-react';
 
 export default function AdminRegistrationsPage() {
   const router = useRouter();
@@ -16,6 +16,8 @@ export default function AdminRegistrationsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('');
   const [checkInFilter, setCheckInFilter] = useState('');
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated() || user?.role !== 'admin') {
@@ -87,10 +89,10 @@ export default function AdminRegistrationsPage() {
       reg.user?.name || '',
       reg.user?.email || '',
       reg.event?.title || '',
-      reg.registrationType || '',
+      reg.event?.eventType || '',
       reg.status || '',
       reg.totalAmount || 0,
-      new Date(reg.createdAt).toLocaleDateString(),
+      reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently',
       reg.utrNumber || ''
     ]);
 
@@ -258,9 +260,15 @@ export default function AdminRegistrationsPage() {
                       </td>
                       <td className="px-6 py-4 text-gray-900">{reg.event?.title}</td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                          {reg.registrationType}
-                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedRegistration(reg);
+                            setShowDetailsModal(true);
+                          }}
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold cursor-pointer hover:scale-105 transition-transform ${reg.event?.eventType === 'team' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                        >
+                          {reg.event?.eventType === 'team' ? '👥 Team' : '👤 Solo'}
+                        </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -290,7 +298,7 @@ export default function AdminRegistrationsPage() {
                       </td>
                       <td className="px-6 py-4 text-gray-900 font-medium">₹{reg.totalAmount}</td>
                       <td className="px-6 py-4 text-gray-600">
-                        {new Date(reg.createdAt).toLocaleDateString()}
+                        {reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently'}
                       </td>
                     </tr>
                     ))}
@@ -319,9 +327,15 @@ export default function AdminRegistrationsPage() {
                       <div className="text-sm">
                         <div className="font-medium text-gray-900">{reg.event?.title}</div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="inline-flex px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                            {reg.registrationType}
-                          </span>
+                          <button
+                            onClick={() => {
+                              setSelectedRegistration(reg);
+                              setShowDetailsModal(true);
+                            }}
+                            className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold cursor-pointer hover:scale-105 transition-transform ${reg.event?.eventType === 'team' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                          >
+                            {reg.event?.eventType === 'team' ? '👥 Team' : '👤 Solo'}
+                          </button>
                         </div>
                       </div>
 
@@ -344,10 +358,10 @@ export default function AdminRegistrationsPage() {
 
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                         <div className="text-sm text-gray-600">
-                          ₹{reg.event?.registrationFee || 0}
+                          ₹{reg.totalAmount || 0}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {new Date(reg.createdAt).toLocaleDateString()}
+                          {reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently'}
                         </div>
                       </div>
                     </div>
@@ -398,6 +412,132 @@ export default function AdminRegistrationsPage() {
           </div>
         </div>
       </div>
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedRegistration && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowDetailsModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  {selectedRegistration.event?.eventType === 'team' ? '👥 Team Details' : '👤 Participant Details'}
+                </h3>
+                <p className="text-purple-100 text-sm mt-1">{selectedRegistration.event?.title}</p>
+              </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {selectedRegistration.event?.eventType === 'team' ? (
+                <>
+                  {/* Team Name */}
+                  {selectedRegistration.teamName && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-200">
+                      <p className="text-sm text-blue-700 font-semibold mb-1">Team Name</p>
+                      <p className="text-xl font-bold text-gray-900">{selectedRegistration.teamName}</p>
+                    </div>
+                  )}
+
+                  {/* Team Leader */}
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center">👑</span>
+                      Team Leader
+                    </h4>
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border-2 border-purple-300">
+                      <p className="font-bold text-gray-900 text-lg mb-2">{selectedRegistration.user?.name}</p>
+                      <div className="space-y-1 text-sm">
+                        <p className="text-gray-600">📧 {selectedRegistration.user?.email}</p>
+                        <p className="text-gray-600">📱 {selectedRegistration.user?.phone}</p>
+                        {selectedRegistration.user?.college && (
+                          <p className="text-gray-600">🏫 {selectedRegistration.user?.college}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Team Members */}
+                  {selectedRegistration.teamMembers && selectedRegistration.teamMembers.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-3">
+                        Other Team Members ({selectedRegistration.teamMembers.length})
+                      </h4>
+                      <div className="space-y-3">
+                        {selectedRegistration.teamMembers.map((member: any, idx: number) => (
+                          <div key={idx} className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                {idx + 2}
+                              </span>
+                              <p className="font-bold text-gray-900">{member.name}</p>
+                            </div>
+                            <div className="ml-9 space-y-1 text-sm">
+                              <p className="text-gray-600">📧 {member.email}</p>
+                              <p className="text-gray-600">📱 {member.phone}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Solo Participant */}
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center">👤</span>
+                      Participant Information
+                    </h4>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-300">
+                      <p className="font-bold text-gray-900 text-lg mb-2">{selectedRegistration.user?.name}</p>
+                      <div className="space-y-1 text-sm">
+                        <p className="text-gray-600">📧 {selectedRegistration.user?.email}</p>
+                        <p className="text-gray-600">📱 {selectedRegistration.user?.phone}</p>
+                        {selectedRegistration.user?.college && (
+                          <p className="text-gray-600">🏫 {selectedRegistration.user?.college}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Registration Info */}
+              <div className="border-t pt-4">
+                <h4 className="text-lg font-bold text-gray-900 mb-3">Registration Details</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Status</p>
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedRegistration.status)}`}>
+                      {selectedRegistration.status}
+                    </span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Amount</p>
+                    <p className="font-bold text-gray-900">₹{selectedRegistration.totalAmount}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Ticket Type</p>
+                    <p className="font-semibold text-gray-900">{selectedRegistration.ticketType}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Check-in Status</p>
+                    <p className={`font-semibold ${selectedRegistration.checkInStatus ? 'text-green-600' : 'text-gray-600'}`}>
+                      {selectedRegistration.checkInStatus ? '✅ Checked in' : '⏳ Not checked in'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

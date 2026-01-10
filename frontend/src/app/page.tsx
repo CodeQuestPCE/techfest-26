@@ -614,11 +614,24 @@ export default function HomePage() {
           {/* Bottom Bar */}
           <div className="border-t border-gray-700/50 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors text-sm">
-                © 2024-2026 EventHub. Made with 
-                <span className="inline-block animate-pulse text-purple-400">💜</span> 
-                by PCE Purnea TechFest Team
-              </p>
+              <div className="flex flex-col items-center md:items-start gap-2">
+                <p className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors text-sm">
+                  © 2026 EventHub. Made with 
+                  <span className="inline-block animate-pulse text-purple-400">💜</span> 
+                  by PCE Purnea TechFest Team
+                </p>
+                <p className="text-xs text-gray-500">
+                  Developed with ❤️ by{' '}
+                  <a 
+                    href="https://github.com/abhi3kumar11" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-purple-400 hover:text-purple-300 transition-colors font-medium hover:underline"
+                  >
+                    Abhishek Kumar
+                  </a>
+                </p>
+              </div>
               <div className="flex gap-6 text-sm">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>

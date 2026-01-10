@@ -12,7 +12,7 @@ exports.getPendingRegistrations = async (req, res) => {
   try {
     const registrations = await Registration.find({ status: 'pending' })
       .populate('user', 'name email phone college')
-      .populate('event', 'title startDate')
+      .populate('event', 'title startDate eventType')
       .sort({ registeredAt: -1 });
 
     res.json({
@@ -211,7 +211,7 @@ exports.getAllRegistrations = async (req, res) => {
 
     const registrations = await Registration.find(query)
       .populate('user', 'name email phone college')
-      .populate('event', 'title startDate')
+      .populate('event', 'title startDate eventType')
       .sort({ registeredAt: -1 });
 
     res.json({

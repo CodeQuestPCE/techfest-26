@@ -125,7 +125,12 @@ export default function AdminDashboard() {
               <div className="mb-6 pb-4 border-b-2 border-gray-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{registration.event.title}</h3>
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="text-2xl font-bold text-gray-900">{registration.event.title}</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${registration.event.eventType === 'team' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                        {registration.event.eventType === 'team' ? '👥 Team Event' : '👤 Solo Event'}
+                      </span>
+                    </div>
                     <p className="text-gray-600 flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       Registered: {registration.registeredAt ? new Date(registration.registeredAt).toLocaleDateString() : 'Recently'}
@@ -142,12 +147,12 @@ export default function AdminDashboard() {
                 <div>
                   <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <Users className="w-5 h-5 text-purple-600" />
-                    Participant Details
+                    {registration.teamName ? 'Team Leader Details' : 'Participant Details'}
                   </h4>
                   <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-600 font-medium min-w-[100px]">Name:</span>
-                      <span className="text-gray-900 font-semibold">{registration.user.name}</span>
+                    <div className="flex items-start gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
+                      <span className="text-purple-700 font-bold min-w-[100px]">{registration.teamName ? '👑 Leader:' : 'Name:'}</span>
+                      <span className="text-gray-900 font-bold">{registration.user.name}</span>
                     </div>
                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                       <span className="text-gray-600 font-medium min-w-[100px]">Email:</span>
@@ -168,6 +173,45 @@ export default function AdminDashboard() {
                       </div>
                     )}
                   </div>
+
+                  {registration.teamMembers && registration.teamMembers.length > 0 && (
+                    <>
+                      <h4 className="text-lg font-bold text-gray-900 mt-6 mb-4 flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-600" />
+                        Team Members ({registration.teamMembers.length + 1})
+                      </h4>
+                      <div className="space-y-3">
+                        {/* Team Leader (Registrant) */}
+                        <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="w-7 h-7 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                              👑
+                            </span>
+                            <span className="text-gray-900 font-bold">{registration.user.name} (Leader)</span>
+                          </div>
+                          <div className="ml-9 space-y-1">
+                            <p className="text-sm text-gray-600">📧 {registration.user.email}</p>
+                            <p className="text-sm text-gray-600">📱 {registration.user.phone}</p>
+                          </div>
+                        </div>
+                        {/* Other Team Members */}
+                        {registration.teamMembers.map((member: any, idx: number) => (
+                          <div key={idx} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                {idx + 2}
+                              </span>
+                              <span className="text-gray-900 font-bold">{member.name}</span>
+                            </div>
+                            <div className="ml-9 space-y-1">
+                              <p className="text-sm text-gray-600">📧 {member.email}</p>
+                              <p className="text-sm text-gray-600">📱 {member.phone}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
 
                   <h4 className="text-lg font-bold text-gray-900 mt-6 mb-4 flex items-center gap-2">
                     <IndianRupee className="w-5 h-5 text-green-600" />
