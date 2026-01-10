@@ -74,7 +74,7 @@ node createAdmin.js
 
 **Default Admin:**
 - Email: `admin@techfest.com`
-- Password: `admin123`
+- Password: (Check console output after running script)
 
 ---
 
@@ -155,11 +155,7 @@ cd backend
 node resetAdmin.js
 ```
 
-This creates:
-- Email: `pcodequest@gmail.com`
-- Password: `admin@#pce`
-
-**Note:** Edit `resetAdmin.js` to customize admin credentials before running.
+**Note:** Edit `resetAdmin.js` to customize admin credentials before running. The script will output credentials after creation.
 
 ---
 
@@ -317,7 +313,7 @@ npm install
 
 **Admin Access:**
 - Email: `pcodequest@gmail.com`
-- Password: `admin@#pce`
+- Password: (Run resetAdmin.js to view/reset credentials)
 
 ---
 
