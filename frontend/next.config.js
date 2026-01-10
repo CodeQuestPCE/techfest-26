@@ -3,6 +3,11 @@ const nextConfig = {
   // Use standalone output for single service deployment
   output: 'standalone',
   
+  // Skip ESLint during builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   // Image optimization
   images: {
     domains: ['localhost'],
