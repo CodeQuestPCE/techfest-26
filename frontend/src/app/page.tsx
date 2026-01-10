@@ -616,9 +616,7 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-col items-center md:items-start gap-2">
                 <p className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors text-sm">
-                  © 2026 EventHub. Made with 
-                  <span className="inline-block animate-pulse text-purple-400">💜</span> 
-                  by PCE Purnea TechFest Team
+                  © 2026 EventHub
                 </p>
                 <p className="text-xs text-gray-500">
                   Developed with ❤️ by{' '}
