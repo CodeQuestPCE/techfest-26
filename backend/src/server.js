@@ -29,6 +29,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy - required for Render and other reverse proxies
+app.set('trust proxy', 1);
+
 // CORS configuration - must be before other middleware
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [process.env.FRONTEND_URL || 'https://your-app.onrender.com']
