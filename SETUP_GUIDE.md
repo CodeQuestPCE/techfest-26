@@ -72,9 +72,6 @@ cd backend
 node createAdmin.js
 ```
 
-**Default Admin:**
-- Email: `admin@techfest.com`
-- Password: (Check console output after running script)
 
 ---
 
@@ -311,11 +308,7 @@ npm install
 - Frontend: https://techfestpce.onrender.com
 - Backend: https://techfest-26-tgyb.onrender.com
 
-**Admin Access:**
-- Email: `pcodequest@gmail.com`
-- Password: (Run resetAdmin.js to view/reset credentials)
 
----
 
 ## 📄 License
 
