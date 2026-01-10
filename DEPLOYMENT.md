@@ -43,9 +43,14 @@ Both services will fit within the free tier (750 hours/month) thanks to auto-sle
 ```
 NODE_ENV=production
 PORT=10000
-MONGODB_URI=mongodb+srv://pcodequest_db_user:77bMpfvwdLVvvX6I@cluster0.kqofxwn.mongodb.net/eventhub?retryWrites=true&w=majority
-JWT_SECRET=7ca5f9fad10e2f7ed457314381df59d165488d12a98ae423629326f6ac349846ce9b3ac82684f53a2e3cb9499c7a8bf47f1aa5333f330abe4c41f0f1e48b5fb7
+MONGODB_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_generated_jwt_secret_from_crypto
 JWT_EXPIRE=30d
+```
+
+**⚠️ Generate JWT_SECRET locally:**
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
 Wait for it to deploy, then **copy the backend URL** (e.g., `https://eventhub-api.onrender.com`)
