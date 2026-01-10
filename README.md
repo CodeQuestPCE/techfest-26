@@ -79,30 +79,71 @@ EventHub supports four distinct user roles, each with specific permissions and c
 ## Getting Started
 
 ### Prerequisites
-- NQuick Start
-
-### Prerequisites
 - Node.js 18+
-- MongoDB
-- npm
+- MongoDB Atlas account (or local MongoDB)
+- npm or yarn
 
-### Setup
+### Local Development Setup
 
-1. Install dependencies:
+1. **Clone the repository:**
 ```bash
-cd backend && npm install
-cd ../frontend && npm install
+git clone https://github.com/CodeQuestPCE/techfest-26.git
+cd techfest-26
 ```
 
-2. Configure environment variables in `backend/.env`
+2. **Backend Setup:**
+```bash
+cd backend
+npm install
 
-3. Start servers:
+# Create .env file
+cp .env.example .env
+# Edit .env with your MongoDB URI and other configs
+```
+
+3. **Frontend Setup:**
+```bash
+cd ../frontend
+npm install
+
+# Create .env.local file
+echo "NEXT_PUBLIC_API_URL=http://localhost:5000/api" > .env.local
+```
+
+4. **Start Development Servers:**
 ```bash
 # Backend (Terminal 1)
-cd backend && npm start
+cd backend
+npm run dev
 
-# Frontend (Terminal 2)
-cd frontend && npm run dev
+# Frontend (Terminal 2)  
+cd frontend
+npm run dev
 ```
 
-4. Access at http://localhost:3000
+5. **Create Admin Account:**
+```bash
+cd backend
+node resetAdmin.js
+```
+
+6. **Access Application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000/api
+- Health Check: http://localhost:5000/api/health
+
+### Production Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions on Render.com
+
+**Quick Summary:**
+- Deploy backend and frontend as separate services on Render
+- Configure environment variables on each service
+- Both services fit in free tier with auto-sleep
+- Admin created manually via script
+
+**Live Demo:**
+- Frontend: https://techfestpce.onrender.com
+- Backend API: https://techfest-26-tgyb.onrender.com/api
+
+*
