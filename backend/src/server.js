@@ -6,6 +6,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const connectDB = require('./config/database');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const {
@@ -29,8 +30,12 @@ connectDB();
 const app = express();
 
 // CORS configuration - must be before other middleware
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.FRONTEND_URL || 'https://your-app.onrender.com']
+  : ['http://localhost:3000', 'http://localhost:3001'];
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -165,6 +170,22 @@ app.use('/api/logs', require('./routes/logs'));
 
 app.use('/api/settings', require('./routes/settings'));
 
+// Serve static frontend files (must be after API routes)
+const frontendPath = path.join(__dirname, '../../frontend/out');
+app.use(express.static(frontendPath));
+
+// Handle client-side routing - send all non-API requests to index.html
+app.get('*', (req, res) => {
+  // Don't handle API routes here
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({
+      success: false,
+      message: 'API route not found'
+    });
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
 // Health check with caching
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
@@ -183,14 +204,6 @@ app.use((err, req, res, next) => {
     success: false,
     message: err.message || 'Internal Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
   });
 });
 
