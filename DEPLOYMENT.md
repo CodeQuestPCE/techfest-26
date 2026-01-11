@@ -110,6 +110,38 @@ NEXT_PUBLIC_API_URL=https://eventhub-api.onrender.com/api
 
 ---
 
+## 📦 Cloudinary Integration (Uploads)
+
+EventHub now uses Cloudinary for all image/file uploads (e.g., payment QR codes).
+
+### Step 1: Create Free Cloudinary Account
+1. Go to https://cloudinary.com/ and sign up for a free account.
+2. In your Cloudinary dashboard, find your **Cloud Name**, **API Key**, and **API Secret**.
+
+### Step 2: Add Cloudinary Environment Variables (Backend)
+In your Render backend service, add these environment variables:
+```
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### Step 3: How Uploads Work
+- When you upload a file (e.g., payment QR code), it is sent to Cloudinary.
+- The backend stores the returned Cloudinary URL in the database.
+- The frontend displays images/files using the Cloudinary URL (no need to change frontend code if you use the returned URL).
+
+### Step 4: No Local Uploads Needed
+- The `uploads/` folder is no longer used in production.
+- All files are stored and served from Cloudinary.
+
+### Step 5: Free Tier Limits
+- 25 GB monthly bandwidth
+- 10 GB storage
+- 25,000 transformations/month
+
+---
+
 ## ✅ Testing Your Deployment
 
 **Frontend URL**: `https://eventhub-frontend.onrender.com`
