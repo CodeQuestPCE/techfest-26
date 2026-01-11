@@ -250,7 +250,9 @@ export default function EventsPage() {
                     <div className="flex items-center gap-2 text-white">
                       <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span className="text-xs sm:text-sm font-semibold">
-                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {event.startDate && !isNaN(new Date(event.startDate).getTime())
+                          ? new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' })
+                          : 'TBA'}
                       </span>
                     </div>
                   </div>
@@ -268,7 +270,9 @@ export default function EventsPage() {
                   <div className="space-y-2 sm:space-y-3 mb-4">
                     <div className="flex items-center gap-3 text-gray-700">
                       <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm font-medium truncate">{event.venue}</span>
+                      <span className="text-xs sm:text-sm font-medium truncate">
+                        {event.location?.venue || event.venue || 'TBA'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3 text-gray-700">
                       <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 flex-shrink-0" />

@@ -26,10 +26,11 @@ export default function EventDetailPage() {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'TBA';
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata',
       });
     } catch {
       return 'TBA';
@@ -41,10 +42,11 @@ export default function EventDetailPage() {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'TBA';
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
+        timeZone: 'Asia/Kolkata',
       });
     } catch {
       return 'TBA';

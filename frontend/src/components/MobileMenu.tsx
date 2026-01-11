@@ -91,7 +91,7 @@ export default function MobileMenu({ isAuthenticated, userRole, onLogout }: Mobi
 
   return (
     <>
-      {/* Hamburger Button */}
+      {/* Hamburger Button (icon only, no text) */}
       <button
         type="button"
         className="lg:hidden p-2 rounded-lg hover:bg-purple-50 transition-all w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center"
