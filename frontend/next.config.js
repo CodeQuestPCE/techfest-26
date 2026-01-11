@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Use standalone output for single service deployment
-  output: 'standalone',
+  // Removed standalone output for Render compatibility
   
   // Skip ESLint during builds
   eslint: {
