@@ -205,8 +205,12 @@ export default function PaymentSettings() {
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <img 
-                src={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${previewUrl}`}
+              <img
+                src={
+                  previewUrl.startsWith('http')
+                    ? previewUrl
+                    : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${previewUrl}`
+                }
                 alt="Payment QR Code Preview"
                 className="w-64 h-64 object-contain border-2 border-gray-300 rounded-lg mx-auto"
                 onError={(e) => {
