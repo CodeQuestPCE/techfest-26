@@ -1,6 +1,6 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
+const stream = require('stream');
+const cloudinaryUploadPDF = require('../middleware/cloudinaryUploadPDF');
 const Registration = require('../models/Registration');
 const emailService = require('../utils/emailService');
 
@@ -43,34 +43,40 @@ exports.generateCertificate = async (req, res) => {
       });
     }
 
-    // Check if certificate already issued
-    if (registration.certificateIssued) {
-      return res.json({
-        success: true,
-        message: 'Certificate already generated',
-        data: {
-          certificateUrl: `/certificates/${registrationId}.pdf`
-        }
-      });
-    }
 
-    // Create certificates directory if it doesn't exist
-    const certDir = path.join(__dirname, '../../certificates');
-    if (!fs.existsSync(certDir)) {
-      fs.mkdirSync(certDir, { recursive: true });
-    }
-
-    const certificatePath = path.join(certDir, `${registrationId}.pdf`);
-
-    // Create PDF document
+    // Create PDF document in memory
     const doc = new PDFDocument({
       layout: 'landscape',
       size: 'A4',
     });
 
-    // Pipe to file
-    const writeStream = fs.createWriteStream(certificatePath);
-    doc.pipe(writeStream);
+    const bufferStream = new stream.PassThrough();
+    const chunks = [];
+    bufferStream.on('data', (chunk) => chunks.push(chunk));
+    bufferStream.on('end', async () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      // Upload to Cloudinary
+      const result = await cloudinaryUploadPDF(pdfBuffer);
+      // Mark certificate as issued and save URL
+      registration.certificateIssued = true;
+      registration.certificateUrl = result.secure_url;
+      await registration.save();
+      // Send email
+      await emailService.sendCertificateEmail(
+        registration.user.email,
+        registration.user.name,
+        registration.event.title,
+        result.secure_url
+      );
+      res.json({
+        success: true,
+        message: 'Certificate generated successfully',
+        data: {
+          certificateUrl: result.secure_url
+        }
+      });
+    });
+    doc.pipe(bufferStream);
 
     // Certificate design
     doc.fontSize(40)
@@ -116,34 +122,6 @@ exports.generateCertificate = async (req, res) => {
 
     doc.end();
 
-    // Wait for PDF to be written
-    writeStream.on('finish', async () => {
-      // Mark certificate as issued
-      registration.certificateIssued = true;
-      await registration.save();
-
-      // Send email
-      const certificateUrl = `${process.env.FRONTEND_URL}/certificates/${registrationId}.pdf`;
-      await emailService.sendCertificateEmail(
-        registration.user.email,
-        registration.user.name,
-        registration.event.title,
-        certificateUrl
-      );
-
-      res.json({
-        success: true,
-        message: 'Certificate generated successfully',
-        data: {
-          certificateUrl: `/certificates/${registrationId}.pdf`
-        }
-      });
-    });
-
-    writeStream.on('error', (error) => {
-      throw error;
-    });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -181,16 +159,16 @@ exports.downloadCertificate = async (req, res) => {
       });
     }
 
-    const certificatePath = path.join(__dirname, '../../certificates', `${registrationId}.pdf`);
-
-    if (!fs.existsSync(certificatePath)) {
+    // Serve the Cloudinary URL if available
+    if (!registration.certificateUrl) {
       return res.status(404).json({
         success: false,
         message: 'Certificate file not found'
       });
     }
-
-    res.download(certificatePath);
+    // Option 1: Redirect to Cloudinary URL
+    return res.redirect(registration.certificateUrl);
+    // Option 2: If you want to stream the file, you can fetch and pipe it (not implemented here)
   } catch (error) {
     res.status(500).json({
       success: false,
