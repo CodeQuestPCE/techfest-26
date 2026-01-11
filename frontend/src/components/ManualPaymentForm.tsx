@@ -177,12 +177,16 @@ export default function ManualPaymentForm({ event }: { event: any }) {
             {paymentSettings?.qrCodeUrl ? (
               <div className="space-y-2">
                 <p className="text-sm text-gray-600 font-medium">Scan QR Code to Pay:</p>
-                <img 
-                  src={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${paymentSettings.qrCodeUrl}`}
+                <img
+                  src={
+                    paymentSettings.qrCodeUrl.startsWith('http')
+                      ? paymentSettings.qrCodeUrl
+                      : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${paymentSettings.qrCodeUrl}`
+                  }
                   alt="Payment QR Code"
                   className="w-64 h-64 object-contain bg-white border-4 border-blue-300 rounded-xl shadow-lg mx-auto"
                   onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256"%3E%3Crect fill="%23f0f0f0" width="256" height="256"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="14"%3EQR Code Not Available%3C/text%3E%3C/svg%3E';
+                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"256\" height=\"256\"%3E%3Crect fill=\"%23f0f0f0\" width=\"256\" height=\"256\"/%3E%3Ctext fill=\"%23999\" x=\"50%25\" y=\"50%25\" text-anchor=\"middle\" dy=\".3em\" font-size=\"14\"%3EQR Code Not Available%3C/text%3E%3C/svg%3E';
                   }}
                 />
                 <p className="text-xs text-center text-gray-500">Open any UPI app to scan</p>
