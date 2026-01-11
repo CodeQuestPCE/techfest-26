@@ -4,7 +4,9 @@ const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
+
 const emailService = require('../utils/emailService');
+const cloudinaryUpload = require('../middleware/cloudinaryUpload');
 
 // @desc    Create registration with manual payment
 exports.createRegistration = async (req, res) => {
@@ -58,8 +60,21 @@ exports.createRegistration = async (req, res) => {
       });
     }
 
-    // Get the uploaded file path
-    const paymentScreenshotUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // Upload payment screenshot to Cloudinary
+    let paymentScreenshotUrl = null;
+    if (req.file && req.file.buffer) {
+      try {
+        const result = await cloudinaryUpload(req.file.buffer, req.file.mimetype);
+        paymentScreenshotUrl = result.secure_url;
+      } catch (err) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to upload payment screenshot',
+          error: err.message
+        });
+      }
+    }
 
     if (!paymentScreenshotUrl) {
       return res.status(400).json({
