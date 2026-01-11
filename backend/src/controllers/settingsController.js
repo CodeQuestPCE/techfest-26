@@ -51,7 +51,11 @@ exports.uploadPaymentQR = async (req, res) => {
       });
     }
 
-    const qrCodeUrl = `/uploads/${req.file.filename}`;
+    // Upload to Cloudinary
+    const cloudinaryUpload = require('../middleware/cloudinaryUpload');
+    const result = await cloudinaryUpload(req.file.buffer, req.file.mimetype);
+    const qrCodeUrl = result.secure_url;
+
     const settings = await Settings.getSettings();
     settings.paymentDetails.qrCodeUrl = qrCodeUrl;
     await settings.save();

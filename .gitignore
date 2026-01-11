@@ -47,7 +47,7 @@ temp/
 *.sqlite
 
 # Logs
-logs/
+# logs/
 *.log
 
 # Project Blueprint (Internal Documentation)

@@ -77,6 +77,18 @@ exports.createEvent = async (req, res) => {
 
     const event = await Event.create(req.body);
 
+    // Log admin action
+    try {
+      const logController = require('./logController');
+      await logController.logAction('create_event', req.user.id, {
+        targetEvent: event._id,
+        details: req.body,
+        ipAddress: req.ip
+      });
+    } catch (err) {
+      console.error('Failed to log event creation:', err);
+    }
+
     res.status(201).json({
       success: true,
       data: event
@@ -113,6 +125,18 @@ exports.updateEvent = async (req, res) => {
       new: true,
       runValidators: true
     });
+
+    // Log admin action
+    try {
+      const logController = require('./logController');
+      await logController.logAction('update_event', req.user.id, {
+        targetEvent: event._id,
+        details: req.body,
+        ipAddress: req.ip
+      });
+    } catch (err) {
+      console.error('Failed to log event update:', err);
+    }
 
     res.json({
       success: true,
