@@ -108,11 +108,15 @@ exports.createRegistration = async (req, res) => {
       });
     }
 
-    // Check ticket type availability
-    if (ticket.available < quantity) {
+    // Atomic ticket availability check and decrement
+    const ticketUpdateResult = await Event.updateOne(
+      { _id: eventId, "ticketTypes.name": ticketType, "ticketTypes.available": { $gte: quantity } },
+      { $inc: { "ticketTypes.$.available": -quantity } }
+    );
+    if (ticketUpdateResult.modifiedCount === 0) {
       return res.status(400).json({
         success: false,
-        message: `Not enough ${ticketType} tickets available. Only ${ticket.available} remaining.`
+        message: `Not enough ${ticketType} tickets available. Please try again.`
       });
     }
 
@@ -173,9 +177,7 @@ exports.createRegistration = async (req, res) => {
       paymentStatus: 'pending'
     });
 
-    // Reserve tickets AFTER successful registration creation
-    ticket.available -= quantity;
-    await event.save();
+    // No need to manually decrement ticket.available here (atomic update above)
 
     // Send email notification
     const user = await User.findById(req.user.id);
@@ -273,12 +275,11 @@ exports.cancelRegistration = async (req, res) => {
     registration.status = 'cancelled';
     await registration.save();
 
-    // Update event availability
-    const event = await Event.findById(registration.event);
-    const ticket = event.ticketTypes.find(t => t.name === registration.ticketType);
-    ticket.available += registration.quantity;
-    event.registeredCount -= registration.quantity;
-    await event.save();
+    // Atomic increment of ticket availability on cancellation
+    await Event.updateOne(
+      { _id: registration.event, "ticketTypes.name": registration.ticketType },
+      { $inc: { "ticketTypes.$.available": registration.quantity } }
+    );
 
     // Cancel tickets
     await Ticket.updateMany(
