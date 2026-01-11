@@ -3,7 +3,7 @@ const router = express.Router();
 const registrationController = require('../controllers/registrationController');
 const { protect } = require('../middleware/auth');
 const { registrationLimiter } = require('../middleware/rateLimiter');
-const upload = require('../middleware/upload');
+const memoryUpload = require('../middleware/memoryUpload');
 
 // @route   POST /api/registrations
 // @desc    Create new registration with manual payment
@@ -12,7 +12,7 @@ router.post(
   '/',
   protect,
   registrationLimiter,
-  upload.single('paymentScreenshot'),
+  memoryUpload.single('paymentScreenshot'),
   registrationController.createRegistration
 );
 

@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const settingsController = require('../controllers/settingsController');
 const { protect, authorize } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const memoryUpload = require('../middleware/memoryUpload');
 
 // All routes require admin access
 router.use(protect);
@@ -42,6 +42,6 @@ router.put('/settings/payment', settingsController.updatePaymentSettings);
 // @route   POST /api/admin/settings/payment/upload-qr
 // @desc    Upload payment QR code image
 // @access  Private/Admin
-router.post('/settings/payment/upload-qr', upload.single('qrCode'), settingsController.uploadPaymentQR);
+router.post('/settings/payment/upload-qr', memoryUpload.single('qrCode'), settingsController.uploadPaymentQR);
 
 module.exports = router;
