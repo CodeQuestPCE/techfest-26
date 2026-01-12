@@ -311,29 +311,29 @@ export default function AdminDashboard() {
       {selectedRegistration && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center px-4 pb-6 pt-4 z-50">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl p-4 sm:p-8 w-full sm:max-w-md shadow-2xl animate-in max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl flex items-center justify-center">
-                <XCircle className="w-7 h-7 text-white" />
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">Reject Registration</h3>
-                <p className="text-gray-600">Provide a detailed reason</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Reject Registration</h3>
+                <p className="text-sm sm:text-base text-gray-600">Provide a detailed reason</p>
               </div>
             </div>
             <textarea
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-6 transition-all"
-              rows={5}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-6 transition-all max-h-[40vh] overflow-y-auto"
+              rows={4}
               placeholder="e.g., UTR number mismatch, payment screenshot not clear, wrong amount paid, duplicate payment..."
             />
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => {
                   setSelectedRegistration(null)
                   setRejectionReason('')
                 }}
-                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-all"
+                className="w-full sm:flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-all text-sm sm:text-base"
               >
                 Cancel
               </button>
@@ -349,7 +349,7 @@ export default function AdminDashboard() {
                   }
                 }}
                 disabled={rejectMutation.isPending}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:from-red-700 hover:to-rose-700 disabled:opacity-50 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                className="w-full sm:flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:from-red-700 hover:to-rose-700 disabled:opacity-50 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all text-sm sm:text-base"
               >
                 {rejectMutation.isPending ? 'Rejecting...' : 'Confirm Rejection'}
               </button>
