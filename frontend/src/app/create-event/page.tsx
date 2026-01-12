@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
-import { Calendar, MapPin, Users, IndianRupee, ArrowLeft, Sparkles, Shield, LogOut } from 'lucide-react';
+import { Calendar, MapPin, Users, IndianRupee, ArrowLeft, Sparkles, Shield, LogOut, Menu } from 'lucide-react';
 import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 const eventSchema = z.object({
@@ -153,10 +153,11 @@ export default function CreateEventPage() {
             <AdminMobileMenu currentPath="/create-event" onLogout={handleLogout} />
           ) : (
             <button
+              aria-label="Open menu"
               onClick={() => router.push('/dashboard')}
               className="lg:hidden p-2 text-gray-700 hover:text-purple-600 rounded-lg"
             >
-              Menu
+              <Menu className="w-5 h-5" />
             </button>
           )}
         </nav>
