@@ -126,6 +126,23 @@ export default function MyRegistrations() {
                 </div>
               )}
 
+              {/* For solo events, display the participant details similar to team layout */}
+              {(!registration.teamMembers || registration.teamMembers.length === 0) && registration.event?.eventType === 'solo' && (
+                <div className="border-t pt-4 mb-4">
+                  <p className="font-semibold mb-3 text-gray-900">Participant:</p>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border-2 border-purple-300">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">👑</span>
+                        <span className="font-semibold text-gray-900">{registration.user?.name || 'Participant'}</span>
+                      </div>
+                      <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email}</p>
+                      <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {registration.status === 'verified' && registration.qrCodeHash && (
                 <div className="border-t pt-4 mt-4">
                   <div className="flex items-start gap-6">
