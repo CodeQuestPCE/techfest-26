@@ -137,20 +137,21 @@ eventSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   
   // Ensure ticketTypes has valid data
+  const defaultQty = 100;
   if (!this.ticketTypes || this.ticketTypes.length === 0) {
     this.ticketTypes = [{
       name: 'General',
       price: this.registrationFee || 0,
-      quantity: this.capacity || 0,
-      available: this.capacity || 0
+      quantity: this.capacity > 0 ? this.capacity : defaultQty,
+      available: this.capacity > 0 ? this.capacity : defaultQty
     }];
   } else {
     // Populate missing fields in ticketTypes
     this.ticketTypes = this.ticketTypes.map(ticket => ({
       name: ticket.name || 'General',
       price: ticket.price !== undefined ? ticket.price : (this.registrationFee || 0),
-      quantity: ticket.quantity !== undefined ? ticket.quantity : (this.capacity || 0),
-      available: ticket.available !== undefined ? ticket.available : (this.capacity || 0),
+      quantity: ticket.quantity !== undefined && ticket.quantity > 0 ? ticket.quantity : (this.capacity > 0 ? this.capacity : defaultQty),
+      available: ticket.available !== undefined && ticket.available > 0 ? ticket.available : (this.capacity > 0 ? this.capacity : defaultQty),
       description: ticket.description
     }));
   }
