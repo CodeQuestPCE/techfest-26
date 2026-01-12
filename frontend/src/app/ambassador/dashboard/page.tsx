@@ -112,7 +112,7 @@ export default function AmbassadorDashboardPage() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2">
               Campus Ambassador Dashboard ⭐
             </h1>
-            <p className="text-white/90 text-lg">Track your referrals and climb the leaderboard!</p>
+            <p className="text-white/90 text-base sm:text-lg">Track your referrals and climb the leaderboard!</p>
           </div>
         </div>
 
@@ -127,7 +127,7 @@ export default function AmbassadorDashboardPage() {
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4 min-w-0">
               <div className="flex-1 w-full min-w-0">
                 <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border-2 border-white/30 w-full overflow-hidden">
-                  <code className="text-2xl sm:text-3xl font-mono font-bold tracking-wider block text-center break-words whitespace-pre-wrap">
+                  <code className="text-xl sm:text-3xl font-mono font-bold tracking-wider block text-center break-words whitespace-pre-wrap">
                     {isGenerating ? 'Generating...' : (user?.referralCode || 'Loading...')}
                   </code>
                 </div>
@@ -190,7 +190,7 @@ export default function AmbassadorDashboardPage() {
 
         {/* Leaderboard */}
         <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <Award className="w-7 h-7 text-purple-600" />
             Top Ambassadors Leaderboard
           </h2>
