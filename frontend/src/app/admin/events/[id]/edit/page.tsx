@@ -66,6 +66,22 @@ export default function EditEventPage() {
 
   const eventType = watch('eventType');
 
+  // Helper: format ISO/UTC datetime for input[type="datetime-local"] (YYYY-MM-DDTHH:MM)
+  const formatToDateTimeLocal = (isoString: string) => {
+    try {
+      const d = new Date(isoString);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth() + 1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const min = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    } catch (e) {
+      return isoString;
+    }
+  };
+
   // Reset form when event data loads
   useEffect(() => {
     if (eventData) {
@@ -77,8 +93,8 @@ export default function EditEventPage() {
         minTeamSize: eventData.minTeamSize,
         maxTeamSize: eventData.maxTeamSize,
         registrationFee: eventData.registrationFee || 0,
-        startDate: eventData.startDate?.split('T')[0],
-        endDate: eventData.endDate?.split('T')[0],
+        startDate: eventData.startDate ? formatToDateTimeLocal(eventData.startDate) : undefined,
+        endDate: eventData.endDate ? formatToDateTimeLocal(eventData.endDate) : undefined,
         venue: eventData.location?.venue || '',
         address: eventData.location?.address || '',
         city: eventData.location?.city || '',
@@ -89,10 +105,20 @@ export default function EditEventPage() {
     }
   }, [eventData, reset]);
 
+
   const updateEventMutation = useMutation({
     mutationFn: async (data: EventFormData) => {
+      // Convert local datetime-local to ISO string
+      const toISOStringSafe = (localDateString?: string) => {
+        if (!localDateString) return undefined;
+        const d = new Date(localDateString);
+        return d.toISOString();
+      };
+
       const payload = {
         ...data,
+        startDate: toISOStringSafe((data as any).startDate),
+        endDate: toISOStringSafe((data as any).endDate),
         location: {
           venue: data.venue,
           address: data.address,
@@ -327,7 +353,7 @@ export default function EditEventPage() {
                     Start Date <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     {...register('startDate')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   />
@@ -340,7 +366,7 @@ export default function EditEventPage() {
                     End Date <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     {...register('endDate')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   />

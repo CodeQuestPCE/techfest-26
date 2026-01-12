@@ -93,22 +93,16 @@ export default function CreateEventPage() {
   });
 
   const onSubmit = (data: EventFormData) => {
-    // Convert local datetime string to IST ISO string
-    const toISTISOString = (localDateString: string) => {
-      if (!localDateString) return '';
-      // localDateString is like '2026-01-15T10:00'
-      const localDate = new Date(localDateString);
-      // Get UTC offset for IST (Asia/Kolkata is UTC+5:30)
-      const istOffsetMinutes = 5.5 * 60;
-      // Adjust date to IST
-      const istDate = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000) + (istOffsetMinutes * 60000));
-      return istDate.toISOString();
+    // Convert local datetime-local string to ISO using browser Date (preserves entered local time)
+    const toISOStringSafe = (localDateString: string) => {
+      const d = new Date(localDateString);
+      return d.toISOString();
     };
 
     const payload = {
       ...data,
-      startDate: toISTISOString(data.startDate),
-      endDate: toISTISOString(data.endDate),
+      startDate: toISOStringSafe(data.startDate),
+      endDate: toISOStringSafe(data.endDate),
     };
     createEventMutation.mutate(payload);
   };
