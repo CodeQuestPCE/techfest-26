@@ -36,6 +36,15 @@ export default function MyRegistrations() {
     return <div className="flex justify-center py-12">Loading...</div>
   }
 
+  const getDisplayAmount = (reg: any) => {
+    if (reg?.totalAmount && reg.totalAmount > 0) return reg.totalAmount
+    const ev = reg.event
+    if (!ev) return 0
+    const ticket = ev.ticketTypes?.find((t: any) => t.name === reg.ticketType) || ev.ticketTypes?.[0]
+    const price = ticket && ticket.price && ticket.price > 0 ? ticket.price : (ev.registrationFee || 0)
+    return price * (reg.quantity || 1)
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">My Registrations</h1>
@@ -83,7 +92,7 @@ export default function MyRegistrations() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Amount Paid</p>
-                  <p className="font-medium">₹{registration.totalAmount || 0}</p>
+                  <p className="font-medium">₹{getDisplayAmount(registration)}</p>
                 </div>
                 {registration.utrNumber && (
                   <div>
