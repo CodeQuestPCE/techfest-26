@@ -124,17 +124,17 @@ export default function AmbassadorDashboardPage() {
               <Sparkles className="w-7 h-7" />
               Your Referral Code
             </h2>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border-2 border-white/30">
-                  <code className="text-3xl font-mono font-bold tracking-wider">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="flex-1 w-full">
+                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border-2 border-white/30 w-full">
+                  <code className="text-2xl sm:text-3xl font-mono font-bold tracking-wider block text-center">
                     {isGenerating ? 'Generating...' : (user?.referralCode || 'Loading...')}
                   </code>
                 </div>
               </div>
               <button
                 onClick={handleCopyReferralCode}
-                className="bg-white text-purple-600 px-8 py-4 rounded-2xl font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
+                className="w-full md:w-auto bg-white text-purple-600 px-6 py-3 rounded-2xl font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
               >
                 <Copy className="w-5 h-5" />
                 Copy Code
@@ -148,7 +148,7 @@ export default function AmbassadorDashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden">
+          <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-6 sm:p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative flex items-center gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -161,7 +161,7 @@ export default function AmbassadorDashboardPage() {
             </div>
           </div>
 
-          <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden">
+          <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-6 sm:p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative flex items-center gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -174,7 +174,7 @@ export default function AmbassadorDashboardPage() {
             </div>
           </div>
 
-          <div className="group relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 rounded-3xl shadow-xl hover:shadow-2xl p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden text-white">
+          <div className="group relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 rounded-3xl shadow-xl hover:shadow-2xl p-6 sm:p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden text-white">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
             <div className="relative flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border-2 border-white/30">
