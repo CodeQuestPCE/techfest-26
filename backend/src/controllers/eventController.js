@@ -73,7 +73,13 @@ exports.getEvent = async (req, res) => {
 // @desc    Create event
 exports.createEvent = async (req, res) => {
   try {
+
     req.body.organizer = req.user.id;
+
+    // Ensure ticketTypes[0].price matches registrationFee
+    if (Array.isArray(req.body.ticketTypes) && req.body.ticketTypes.length > 0 && typeof req.body.registrationFee === 'number') {
+      req.body.ticketTypes[0].price = req.body.registrationFee;
+    }
 
     // Validate startDate and endDate
     if (!req.body.startDate || isNaN(Date.parse(req.body.startDate))) {
@@ -133,6 +139,12 @@ exports.updateEvent = async (req, res) => {
         success: false,
         message: 'Not authorized to update this event'
       });
+    }
+
+
+    // Ensure ticketTypes[0].price matches registrationFee
+    if (Array.isArray(req.body.ticketTypes) && req.body.ticketTypes.length > 0 && typeof req.body.registrationFee === 'number') {
+      req.body.ticketTypes[0].price = req.body.registrationFee;
     }
 
     event = await Event.findByIdAndUpdate(req.params.id, req.body, {
