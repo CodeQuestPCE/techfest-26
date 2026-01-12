@@ -104,12 +104,12 @@ export default function AmbassadorDashboardPage() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Banner */}
-        <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden">
+        <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl shadow-2xl p-6 sm:p-8 mb-8 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           
           <div className="relative">
-            <h1 className="text-4xl font-extrabold text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2">
               Campus Ambassador Dashboard ⭐
             </h1>
             <p className="text-white/90 text-lg">Track your referrals and climb the leaderboard!</p>
@@ -147,7 +147,7 @@ export default function AmbassadorDashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
           <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-6 sm:p-8 hover:-translate-y-2 transition-all duration-300 overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative flex items-center gap-4">
@@ -155,7 +155,7 @@ export default function AmbassadorDashboardPage() {
                 <Award className="w-8 h-8 text-white" />
               </div>
               <div>
-                <div className="text-4xl font-bold text-gray-900">{statsData?.points || 0}</div>
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">{statsData?.points || 0}</div>
                 <div className="text-sm text-gray-600 font-medium">Total Points 🏆</div>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function AmbassadorDashboardPage() {
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div>
-                <div className="text-4xl font-bold text-gray-900">{statsData?.referredUsers || 0}</div>
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">{statsData?.referredUsers || 0}</div>
                 <div className="text-sm text-gray-600 font-medium">Referrals 👥</div>
               </div>
             </div>
@@ -181,7 +181,7 @@ export default function AmbassadorDashboardPage() {
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
               <div>
-                <div className="text-4xl font-bold">#{statsData?.rank || '-'}</div>
+                <div className="text-3xl sm:text-4xl font-bold">#{statsData?.rank || '-'}</div>
                 <div className="text-sm text-white/90 font-medium">Your Rank 🚀</div>
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function AmbassadorDashboardPage() {
         </div>
 
         {/* Leaderboard */}
-        <div className="bg-white rounded-3xl shadow-xl p-8">
+        <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <Award className="w-7 h-7 text-purple-600" />
             Top Ambassadors Leaderboard
