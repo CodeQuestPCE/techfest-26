@@ -51,9 +51,9 @@ export default function AdminRegistrationsPage() {
     const matchesSearch = !searchTerm ||
       reg.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       reg.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reg.event?.title?.toLowerCase().includes(searchTerm.toLowerCase());
+      (reg.event?.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     const matchesStatus = !statusFilter || reg.status === statusFilter;
-    const matchesEvent = !eventFilter || reg.event?._id === eventFilter;
+    const matchesEvent = !eventFilter || (reg.event && reg.event._id === eventFilter);
     const matchesCheckIn = !checkInFilter || 
       (checkInFilter === 'checked-in' && reg.checkInStatus) ||
       (checkInFilter === 'not-checked-in' && !reg.checkInStatus);
@@ -258,7 +258,7 @@ export default function AdminRegistrationsPage() {
                           <div className="text-sm text-gray-500">{reg.user?.email}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-900">{reg.event?.title}</td>
+                      <td className="px-6 py-4 text-gray-900">{reg.event ? reg.event.title : <span className="text-red-500">[Event Deleted]</span>}</td>
                       <td className="px-6 py-4">
                         <button
                           onClick={() => {
@@ -267,7 +267,7 @@ export default function AdminRegistrationsPage() {
                           }}
                           className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold cursor-pointer hover:scale-105 transition-transform ${reg.event?.eventType === 'team' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
                         >
-                          {reg.event?.eventType === 'team' ? '👥 Team' : '👤 Solo'}
+                          {reg.event ? (reg.event.eventType === 'team' ? '👥 Team' : '👤 Solo') : '[Event Deleted]'}
                         </button>
                       </td>
                       <td className="px-6 py-4">
@@ -325,7 +325,7 @@ export default function AdminRegistrationsPage() {
                       </div>
                       
                       <div className="text-sm">
-                        <div className="font-medium text-gray-900">{reg.event?.title}</div>
+                        <div className="font-medium text-gray-900">{reg.event ? reg.event.title : <span className="text-red-500">[Event Deleted]</span>}</div>
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             onClick={() => {
@@ -334,7 +334,7 @@ export default function AdminRegistrationsPage() {
                             }}
                             className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold cursor-pointer hover:scale-105 transition-transform ${reg.event?.eventType === 'team' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
                           >
-                            {reg.event?.eventType === 'team' ? '👥 Team' : '👤 Solo'}
+                            {reg.event ? (reg.event.eventType === 'team' ? '👥 Team' : '👤 Solo') : '[Event Deleted]'}
                           </button>
                         </div>
                       </div>
@@ -420,9 +420,9 @@ export default function AdminRegistrationsPage() {
             <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold flex items-center gap-2">
-                  {selectedRegistration.event?.eventType === 'team' ? '👥 Team Details' : '👤 Participant Details'}
+                  {selectedRegistration.event ? (selectedRegistration.event.eventType === 'team' ? '👥 Team Details' : '👤 Participant Details') : '[Event Deleted]'}
                 </h3>
-                <p className="text-purple-100 text-sm mt-1">{selectedRegistration.event?.title}</p>
+                <p className="text-purple-100 text-sm mt-1">{selectedRegistration.event ? selectedRegistration.event.title : <span className="text-red-200">[Event Deleted]</span>}</p>
               </div>
               <button
                 onClick={() => setShowDetailsModal(false)}
