@@ -28,12 +28,15 @@ async function main() {
 
     if (!reg.totalAmount || reg.totalAmount === 0) {
       const ticket = event.ticketTypes.find(t => t.name === reg.ticketType) || event.ticketTypes[0];
-      if (ticket && ticket.price) {
-        const newAmount = ticket.price * (reg.quantity || 1);
+      const effectivePrice = (ticket && ticket.price && ticket.price > 0) ? ticket.price : (event.registrationFee || 0);
+      const newAmount = effectivePrice * (reg.quantity || 1);
+      if (newAmount > 0) {
         reg.totalAmount = newAmount;
         await reg.save();
         fixed++;
         console.log(`Fixed registration ${reg._id}: totalAmount set to ${newAmount}`);
+      } else {
+        console.log(`Skipped fixing ${reg._id}: computed amount ${newAmount}`);
       }
     }
   }

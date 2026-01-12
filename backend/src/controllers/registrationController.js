@@ -108,18 +108,6 @@ exports.createRegistration = async (req, res) => {
       });
     }
 
-    // Atomic ticket availability check and decrement
-    const ticketUpdateResult = await Event.updateOne(
-      { _id: eventId, "ticketTypes.name": ticketType, "ticketTypes.available": { $gte: quantity } },
-      { $inc: { "ticketTypes.$.available": -quantity } }
-    );
-    if (ticketUpdateResult.modifiedCount === 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Not enough ${ticketType} tickets available. Please try again.`
-      });
-    }
-
     // Check if user already registered for this event
     const existingRegistration = await Registration.findOne({ 
       event: eventId, 
@@ -145,6 +133,18 @@ exports.createRegistration = async (req, res) => {
       }
     }
 
+    // Atomic ticket availability check and decrement and reserve spots
+    const ticketUpdateResult = await Event.updateOne(
+      { _id: eventId, "ticketTypes.name": ticketType, "ticketTypes.available": { $gte: quantity } },
+      { $inc: { "ticketTypes.$.available": -quantity, registeredCount: quantity } }
+    );
+    if (ticketUpdateResult.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Not enough ${ticketType} tickets available. Please try again.`
+      });
+    }
+
     // Validate team size for team events
     if (event.eventType === 'team') {
       console.log('Team validation - minSize:', event.minTeamSize, 'maxSize:', event.maxTeamSize, 'teamMembers:', teamMembers?.length);
@@ -159,23 +159,35 @@ exports.createRegistration = async (req, res) => {
 
     console.log('All validations passed, creating registration...');
 
-    const totalAmount = ticket.price * quantity;
+    // Ensure totalAmount uses event.registrationFee if ticket price is missing
+    const effectivePrice = (ticket.price && ticket.price > 0) ? ticket.price : (event.registrationFee || 0);
+    const totalAmount = effectivePrice * quantity;
 
     // Create registration with Pending status
-    const registration = await Registration.create({
-      event: eventId,
-      user: req.user.id,
-      ticketType,
-      quantity,
-      totalAmount,
-      attendeeInfo,
-      teamName,
-      teamMembers,
-      utrNumber,
-      paymentScreenshotUrl,
-      status: 'pending',
-      paymentStatus: 'pending'
-    });
+    let registration;
+    try {
+      registration = await Registration.create({
+        event: eventId,
+        user: req.user.id,
+        ticketType,
+        quantity,
+        totalAmount,
+        attendeeInfo,
+        teamName,
+        teamMembers,
+        utrNumber,
+        paymentScreenshotUrl,
+        status: 'pending',
+        paymentStatus: 'pending'
+      });
+    } catch (err) {
+      // Revert ticket reservation if registration creation failed
+      await Event.updateOne(
+        { _id: eventId, "ticketTypes.name": ticketType },
+        { $inc: { "ticketTypes.$.available": quantity, registeredCount: -quantity } }
+      );
+      throw err;
+    }
 
     // No need to manually decrement ticket.available here (atomic update above)
 
@@ -278,7 +290,7 @@ exports.cancelRegistration = async (req, res) => {
     // Atomic increment of ticket availability on cancellation
     await Event.updateOne(
       { _id: registration.event, "ticketTypes.name": registration.ticketType },
-      { $inc: { "ticketTypes.$.available": registration.quantity } }
+      { $inc: { "ticketTypes.$.available": registration.quantity, registeredCount: -registration.quantity } }
     );
 
     // Cancel tickets
