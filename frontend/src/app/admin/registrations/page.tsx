@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import AdminMobileMenu from '@/components/AdminMobileMenu';
 import { Users, Search, Filter, Download, Home, LogOut, Calendar, CheckCircle, Clock, XCircle, Shield, Sparkles, X } from 'lucide-react';
+import computeAmount from '@/lib/computeAmount';
 
 export default function AdminRegistrationsPage() {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function AdminRegistrationsPage() {
       reg.event?.title || '',
       reg.event?.eventType || '',
       reg.status || '',
-      reg.totalAmount || 0,
+      computeAmount(reg) || 0,
       reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently',
       reg.utrNumber || ''
     ]);
@@ -296,7 +297,7 @@ export default function AdminRegistrationsPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-900 font-medium">₹{reg.totalAmount}</td>
+                      <td className="px-6 py-4 text-gray-900 font-medium">₹{computeAmount(reg)}</td>
                       <td className="px-6 py-4 text-gray-600">
                         {reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently'}
                       </td>
@@ -358,7 +359,7 @@ export default function AdminRegistrationsPage() {
 
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                         <div className="text-sm text-gray-600">
-                          ₹{reg.totalAmount || 0}
+                          ₹{computeAmount(reg) || 0}
                         </div>
                         <div className="text-xs text-gray-500">
                           {reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently'}
@@ -381,11 +382,11 @@ export default function AdminRegistrationsPage() {
 
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-sm font-medium text-gray-600 mb-2">Total</h3>
             <p className="text-3xl font-bold text-gray-900">{registrations?.length || 0}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-sm font-medium text-gray-600 mb-2">Verified</h3>
             <p className="text-3xl font-bold text-green-600">
               {registrations?.filter((r: any) => r.status === 'verified').length || 0}
@@ -405,9 +406,9 @@ export default function AdminRegistrationsPage() {
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-sm font-medium text-gray-600 mb-2">Total Revenue</h3>
-            <p className="text-3xl font-bold text-purple-600">
+              <p className="text-3xl font-bold text-purple-600">
               ₹{registrations?.filter((r: any) => r.status === 'verified')
-                .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0) || 0}
+                .reduce((sum: number, r: any) => sum + (computeAmount(r) || 0), 0) || 0}
             </p>
           </div>
         </div>
@@ -520,7 +521,7 @@ export default function AdminRegistrationsPage() {
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-600 mb-1">Amount</p>
-                    <p className="font-bold text-gray-900">₹{selectedRegistration.totalAmount}</p>
+                    <p className="font-bold text-gray-900">₹{computeAmount(selectedRegistration)}</p>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-600 mb-1">Ticket Type</p>

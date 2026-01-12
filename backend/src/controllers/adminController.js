@@ -53,10 +53,7 @@ exports.approveRegistration = async (req, res) => {
     registration.status = 'verified';
     registration.paymentStatus = 'completed';
 
-    // Increment registered count on approval
-    const event = await Event.findById(registration.event._id);
-    event.registeredCount += registration.quantity;
-    await event.save();
+    // registeredCount is incremented at reservation time; no-op here to avoid double-counting
 
     // Generate QR code hash
     const qrHash = crypto.randomBytes(32).toString('hex');

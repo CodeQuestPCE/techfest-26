@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { Download, CheckCircle, Clock, XCircle } from 'lucide-react'
+import computeAmount from '@/lib/computeAmount'
 import { QRCodeSVG } from 'qrcode.react'
 
 export default function MyRegistrations() {
@@ -83,7 +84,7 @@ export default function MyRegistrations() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Amount Paid</p>
-                  <p className="font-medium">₹{registration.totalAmount || 0}</p>
+                  <p className="font-medium">₹{computeAmount(registration) || 0}</p>
                 </div>
                 {registration.utrNumber && (
                   <div>

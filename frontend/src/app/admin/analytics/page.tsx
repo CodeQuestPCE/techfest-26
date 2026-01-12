@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { BarChart3, Users, Calendar, IndianRupee, CheckCircle, Clock, XCircle, Home, LogOut, TrendingUp, Award, Sparkles, Shield } from 'lucide-react';
+import computeAmount from '@/lib/computeAmount';
 import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 export default function AdminAnalyticsPage() {
@@ -67,7 +68,7 @@ export default function AdminAnalyticsPage() {
     verifiedRegistrations: registrations?.filter((r: any) => r.status === 'verified').length || 0,
     rejectedRegistrations: registrations?.filter((r: any) => r.status === 'rejected').length || 0,
     totalRevenue: registrations?.filter((r: any) => r.status === 'verified')
-      .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0) || 0,
+      .reduce((sum: number, r: any) => sum + (computeAmount(r) || 0), 0) || 0,
     averageRegistrationFee: events?.length > 0 
       ? Math.round(events.reduce((sum: number, e: any) => sum + (e.registrationFee || 0), 0) / events.length)
       : 0,

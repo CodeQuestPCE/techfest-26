@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import { Check, X, Eye, Clock, CheckCircle2, XCircle, TrendingUp, Users, IndianRupee, Calendar } from 'lucide-react'
+import computeAmount from '@/lib/computeAmount'
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient()
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
   }
 
   const totalPending = pendingRegistrations?.length || 0
-  const totalAmount = pendingRegistrations?.reduce((sum: number, reg: any) => sum + (reg.totalAmount || 0), 0) || 0
+  const totalAmount = pendingRegistrations?.reduce((sum: number, reg: any) => sum + (computeAmount(reg) || 0), 0) || 0
 
   return (
     <div>
@@ -220,7 +221,7 @@ export default function AdminDashboard() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
                       <span className="text-gray-700 font-medium">Amount:</span>
-                      <span className="text-2xl font-bold text-green-700">₹{registration.totalAmount}</span>
+                      <span className="text-2xl font-bold text-green-700">₹{computeAmount(registration)}</span>
                     </div>
                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                       <span className="text-gray-600 font-medium min-w-[100px]">Ticket:</span>
