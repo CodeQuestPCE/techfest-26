@@ -126,9 +126,9 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-2xl font-bold text-gray-900">{registration.event.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${registration.event.eventType === 'team' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                        {registration.event.eventType === 'team' ? '👥 Team Event' : '👤 Solo Event'}
+                      <h3 className="text-2xl font-bold text-gray-900">{registration.event ? registration.event.title : <span className="text-red-500">[Event Deleted]</span>}</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${registration.event?.eventType === 'team' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                        {registration.event ? (registration.event.eventType === 'team' ? '👥 Team Event' : '👤 Solo Event') : '[Event Deleted]'}
                       </span>
                     </div>
                     <p className="text-gray-600 flex items-center gap-2">
