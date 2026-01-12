@@ -9,7 +9,7 @@ const notificationLogSchema = new mongoose.Schema({
   performedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   targetUser: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,10 +30,13 @@ const notificationLogSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: true
 });
 
 // Index for efficient querying
 notificationLogSchema.index({ performedBy: 1, timestamp: -1 });
+notificationLogSchema.index({ action: 1, timestamp: -1 });
 notificationLogSchema.index({ action: 1, timestamp: -1 });
 
 module.exports = mongoose.model('NotificationLog', notificationLogSchema);

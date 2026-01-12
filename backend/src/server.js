@@ -8,6 +8,7 @@ const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const connectDB = require('./config/database');
+const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const {
   sanitizeRequest,
@@ -49,10 +50,10 @@ app.use(compression({
   level: 6, // Compression level (0-9)
   threshold: 1024, // Only compress responses larger than 1KB
   filter: (req, res) => {
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    return compression.filter(req, res);
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
   }
 }));
 
@@ -86,7 +87,7 @@ app.use(securityHeaders);
 app.use(mongoSanitize({
   replaceWith: '_',
   onSanitize: ({ req, key }) => {
-    console.warn(`⚠️  Sanitized ${key} in request from ${req.ip}`);
+    logger.warn(`Sanitized ${key} in request from ${req.ip}`);
   }
 }));
 
@@ -176,8 +177,8 @@ app.use('/api/settings', require('./routes/settings'));
 // Health check with caching
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
@@ -186,7 +187,7 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal Server Error',
@@ -208,8 +209,8 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
+  logger.info(`Server is running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV}`);
 });
 
 module.exports = app;

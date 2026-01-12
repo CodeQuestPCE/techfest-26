@@ -1,13 +1,13 @@
 const NotificationLog = require('../models/NotificationLog');
 
 // Log admin action
-exports.logAction = async (action, performedBy, details = {}) => {
+exports.logAction = async (action, performedBy = null, details = {}) => {
   try {
     await NotificationLog.create({
       action,
       performedBy,
-      ...details,
-      timestamp: new Date()
+      details,
+      timestamp: details.timestamp || new Date()
     });
   } catch (error) {
     console.error('Failed to log action:', error.message);
@@ -30,10 +30,26 @@ exports.getActivityLogs = async (req, res) => {
       .sort({ timestamp: -1 })
       .limit(parseInt(limit));
 
+    // Normalize and add displayTimestamp for frontend
+    const data = logs.map(l => {
+      const ts = l.timestamp || l.createdAt || null;
+      return {
+        _id: l._id,
+        action: l.action,
+        performedBy: l.performedBy || null,
+        targetUser: l.targetUser || null,
+        targetEvent: l.targetEvent || null,
+        targetRegistration: l.targetRegistration || null,
+        details: l.details || {},
+        timestamp: ts,
+        displayTimestamp: ts ? new Date(ts).toISOString() : null
+      };
+    });
+
     res.json({
       success: true,
-      count: logs.length,
-      data: logs
+      count: data.length,
+      data
     });
   } catch (error) {
     res.status(500).json({
@@ -51,10 +67,22 @@ exports.getUserLogs = async (req, res) => {
       .sort({ timestamp: -1 })
       .limit(50);
 
+    const data = logs.map(l => {
+      const ts = l.timestamp || l.createdAt || null;
+      return {
+        _id: l._id,
+        action: l.action,
+        performedBy: l.performedBy || null,
+        details: l.details || {},
+        timestamp: ts,
+        displayTimestamp: ts ? new Date(ts).toISOString() : null
+      };
+    });
+
     res.json({
       success: true,
-      count: logs.length,
-      data: logs
+      count: data.length,
+      data
     });
   } catch (error) {
     res.status(500).json({
