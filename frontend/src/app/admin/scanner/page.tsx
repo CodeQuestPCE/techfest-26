@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Scan, CheckCircle, XCircle, User, Calendar, Home, LogOut, QrCode, Shield, Sparkles, Camera, CameraOff, X } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeScanner } from 'html5-qrcode';
 import MobileMenu from '@/components/MobileMenu';
 
 export default function QRScannerPage() {
@@ -20,7 +20,7 @@ export default function QRScannerPage() {
   const [scanMode, setScanMode] = useState<'camera' | 'manual'>('camera');
   const [mounted, setMounted] = useState(false);
   const lastScannedRef = useRef<string>('');
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5Qrcode | Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -40,9 +40,17 @@ export default function QRScannerPage() {
           // Check if the element still exists before clearing
           const element = document.getElementById('qr-reader');
           if (element && element.parentNode) {
-            scannerRef.current.clear().catch(() => {
-              // Silently catch any DOM errors during cleanup
-            });
+            // call stop() then clear() if available
+            // @ts-ignore
+            if (typeof scannerRef.current.stop === 'function') {
+              // @ts-ignore
+              scannerRef.current.stop().catch(() => {});
+            }
+            // @ts-ignore
+            if (typeof scannerRef.current.clear === 'function') {
+              // @ts-ignore
+              scannerRef.current.clear().catch(() => {});
+            }
           }
         } catch (error) {
           // Ignore errors during unmount
@@ -119,6 +127,7 @@ export default function QRScannerPage() {
 
       // Clear any previous content
       element.innerHTML = '';
+
       // Ensure camera permission is requested explicitly so we can give clear feedback
       if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
         toast.error('Camera access is not supported by this browser.');
@@ -127,8 +136,8 @@ export default function QRScannerPage() {
       }
 
       try {
-        const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // Immediately stop the temporary stream; this call forces the browser permission prompt
+        // Request camera permission preferring the back camera on mobile
+        const tempStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
         tempStream.getTracks().forEach((t) => t.stop());
       } catch (err: any) {
         console.error('User denied camera permission or camera not available:', err);
@@ -143,31 +152,54 @@ export default function QRScannerPage() {
         return;
       }
 
-      const scanner = new Html5QrcodeScanner(
-        'qr-reader',
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true,
-          formatsToSupport: undefined, // Support all formats
-        },
-        /* verbose= */ false
-      );
-
-      await scanner.render(
-        (decodedText) => {
-          console.log('QR Code detected:', decodedText);
-          handleCameraScan(decodedText);
-        },
-        (error) => {
-          // Ignore scanning errors - they happen continuously while scanning
-          // console.log('Scanning...', error);
+      // Prefer back-facing camera when available
+      let cameraId: string | null = null;
+      try {
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras && cameras.length) {
+          // Try to pick a camera with 'back' or 'rear' in label, otherwise the first camera
+          const preferred = cameras.find((c: any) => /back|rear|environment/i.test(c.label || '')) || cameras[0];
+          cameraId = preferred.id || preferred.deviceId || null;
         }
-      );
+      } catch (e) {
+        // ignore, will fallback to default
+        console.warn('Unable to enumerate cameras, falling back to default.');
+      }
 
-      scannerRef.current = scanner;
-      toast.success('Camera started successfully!');
+      try {
+        const html5Qr = new Html5Qrcode('qr-reader');
+
+        // Responsive qrbox size
+        const containerWidth = element.clientWidth || element.getBoundingClientRect().width || 300;
+        const qrboxSize = Math.min(360, Math.max(200, Math.floor(containerWidth * 0.7)));
+
+        const config = {
+          fps: 15,
+          qrbox: qrboxSize,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: false },
+          verbose: false,
+        } as any;
+
+        const cameraArg = cameraId || { facingMode: { ideal: 'environment' } };
+
+        await html5Qr.start(
+          cameraArg,
+          config,
+          (decodedText) => {
+            handleCameraScan(decodedText);
+          },
+          (errorMessage) => {
+            // scanning errors are frequent; ignore or log if needed
+          }
+        );
+
+        scannerRef.current = html5Qr;
+        toast.success('Camera started successfully!');
+      } catch (err) {
+        console.error('Failed to start Html5Qrcode:', err);
+        toast.error('Failed to start camera. Please refresh and try again.');
+        setCameraActive(false);
+      }
     } catch (error) {
       console.error('Failed to start camera:', error);
       toast.error('Failed to start camera. Please check camera permissions.');
@@ -179,12 +211,27 @@ export default function QRScannerPage() {
   const stopCamera = async () => {
     try {
       if (scannerRef.current) {
-        // Check if the element still exists before clearing
-        const element = document.getElementById('qr-reader');
-        if (element && element.parentNode) {
-          await scannerRef.current.clear().catch(() => {
-            // Silently catch DOM removal errors
-          });
+        try {
+          // If using Html5Qrcode instance, stop the camera first then clear
+          // @ts-ignore
+          if (typeof scannerRef.current.stop === 'function') {
+            // @ts-ignore
+            await scannerRef.current.stop();
+          }
+          // clear UI
+          // @ts-ignore
+          if (typeof scannerRef.current.clear === 'function') {
+            // @ts-ignore
+            await scannerRef.current.clear();
+          }
+        } catch (e) {
+          // fallback: attempt to stop any active video tracks
+          try {
+            const videos = document.querySelectorAll('video');
+            videos.forEach((v: any) => {
+              try { v.srcObject?.getTracks?.()?.forEach((t: any) => t.stop()); } catch (_) {}
+            });
+          } catch (_) {}
         }
         scannerRef.current = null;
       }
