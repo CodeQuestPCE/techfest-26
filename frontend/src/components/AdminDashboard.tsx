@@ -309,8 +309,8 @@ export default function AdminDashboard() {
 
       {/* Rejection Modal */}
       {selectedRegistration && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center px-4 pb-6 pt-4 z-50">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl p-4 sm:p-8 w-full sm:max-w-md shadow-2xl animate-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl flex items-center justify-center">
                 <XCircle className="w-7 h-7 text-white" />
