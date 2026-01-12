@@ -75,6 +75,20 @@ exports.createEvent = async (req, res) => {
   try {
     req.body.organizer = req.user.id;
 
+    // Validate startDate and endDate
+    if (!req.body.startDate || isNaN(Date.parse(req.body.startDate))) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid start date is required.'
+      });
+    }
+    if (!req.body.endDate || isNaN(Date.parse(req.body.endDate))) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid end date is required.'
+      });
+    }
+
     const event = await Event.create(req.body);
 
     // Log admin action
