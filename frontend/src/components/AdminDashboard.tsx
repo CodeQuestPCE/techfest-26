@@ -64,16 +64,7 @@ export default function AdminDashboard() {
   }
 
   const totalPending = pendingRegistrations?.length || 0
-  const getDisplayAmount = (reg: any) => {
-    if (reg?.totalAmount && reg.totalAmount > 0) return reg.totalAmount
-    const ev = reg.event
-    if (!ev) return 0
-    const ticket = ev.ticketTypes?.find((t: any) => t.name === reg.ticketType) || ev.ticketTypes?.[0]
-    const price = ticket && ticket.price && ticket.price > 0 ? ticket.price : (ev.registrationFee || 0)
-    return price * (reg.quantity || 1)
-  }
-
-  const totalAmount = pendingRegistrations?.reduce((sum: number, reg: any) => sum + getDisplayAmount(reg), 0) || 0
+  const totalAmount = pendingRegistrations?.reduce((sum: number, reg: any) => sum + (reg.totalAmount || 0), 0) || 0
 
   return (
     <div>
@@ -229,7 +220,7 @@ export default function AdminDashboard() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
                       <span className="text-gray-700 font-medium">Amount:</span>
-                      <span className="text-2xl font-bold text-green-700">₹{getDisplayAmount(registration)}</span>
+                      <span className="text-2xl font-bold text-green-700">₹{registration.totalAmount}</span>
                     </div>
                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                       <span className="text-gray-600 font-medium min-w-[100px]">Ticket:</span>

@@ -85,22 +85,13 @@ export default function AdminRegistrationsPage() {
     }
 
     const headers = ['Name', 'Email', 'Event', 'Type', 'Status', 'Amount', 'Date', 'UTR'];
-    const computeAmount = (reg: any) => {
-      if (reg?.totalAmount && reg.totalAmount > 0) return reg.totalAmount
-      const ev = reg.event
-      if (!ev) return 0
-      const ticket = ev.ticketTypes?.find((t: any) => t.name === reg.ticketType) || ev.ticketTypes?.[0]
-      const price = ticket && ticket.price && ticket.price > 0 ? ticket.price : (ev.registrationFee || 0)
-      return price * (reg.quantity || 1)
-    }
-
     const rows = filteredRegistrations.map((reg: any) => [
       reg.user?.name || '',
       reg.user?.email || '',
       reg.event?.title || '',
       reg.event?.eventType || '',
       reg.status || '',
-      computeAmount(reg) || 0,
+      reg.totalAmount || 0,
       reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently',
       reg.utrNumber || ''
     ]);
@@ -305,7 +296,7 @@ export default function AdminRegistrationsPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-900 font-medium">₹{computeAmount(reg)}</td>
+                      <td className="px-6 py-4 text-gray-900 font-medium">₹{reg.totalAmount}</td>
                       <td className="px-6 py-4 text-gray-600">
                         {reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently'}
                       </td>
@@ -365,9 +356,9 @@ export default function AdminRegistrationsPage() {
                         </div>
                       )}
 
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                         <div className="text-sm text-gray-600">
-                          ₹{computeAmount(reg) || 0}
+                          ₹{reg.totalAmount || 0}
                         </div>
                         <div className="text-xs text-gray-500">
                           {reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString() : 'Recently'}
