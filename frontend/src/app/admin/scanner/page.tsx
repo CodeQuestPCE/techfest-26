@@ -119,6 +119,29 @@ export default function QRScannerPage() {
 
       // Clear any previous content
       element.innerHTML = '';
+      // Ensure camera permission is requested explicitly so we can give clear feedback
+      if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+        toast.error('Camera access is not supported by this browser.');
+        setCameraActive(false);
+        return;
+      }
+
+      try {
+        const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        // Immediately stop the temporary stream; this call forces the browser permission prompt
+        tempStream.getTracks().forEach((t) => t.stop());
+      } catch (err: any) {
+        console.error('User denied camera permission or camera not available:', err);
+        if (err && err.name === 'NotAllowedError') {
+          toast.error('Camera permission denied. Please allow camera access in your browser settings.');
+        } else if (err && err.name === 'NotFoundError') {
+          toast.error('No camera device found. Please connect a camera and try again.');
+        } else {
+          toast.error('Unable to access camera. Please check permissions and try again.');
+        }
+        setCameraActive(false);
+        return;
+      }
 
       const scanner = new Html5QrcodeScanner(
         'qr-reader',
