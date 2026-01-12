@@ -245,16 +245,22 @@ export default function AdminDashboard() {
                   {registration.paymentScreenshotUrl ? (
                     <div className="relative group">
                       <img
-                        src={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`}
+                        src={registration.paymentScreenshotUrl.startsWith('http')
+                          ? registration.paymentScreenshotUrl
+                          : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`}
                         alt="Payment Screenshot"
                         className="w-full rounded-2xl border-4 border-gray-200 cursor-pointer hover:border-purple-400 transition-all shadow-lg hover:shadow-2xl"
                         onClick={() => {
-                          const fullUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
+                          const fullUrl = registration.paymentScreenshotUrl.startsWith('http')
+                            ? registration.paymentScreenshotUrl
+                            : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
                           console.log('Opening image:', fullUrl);
                           window.open(fullUrl, '_blank');
                         }}
                         onError={(e) => {
-                          const fullUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
+                          const fullUrl = registration.paymentScreenshotUrl.startsWith('http')
+                            ? registration.paymentScreenshotUrl
+                            : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
                           console.error('Image load error. URL:', fullUrl);
                           console.error('PaymentScreenshotUrl from backend:', registration.paymentScreenshotUrl);
                           e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not found%3C/text%3E%3C/svg%3E';
