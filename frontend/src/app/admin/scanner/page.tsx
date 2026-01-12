@@ -40,17 +40,27 @@ export default function QRScannerPage() {
           // Check if the element still exists before clearing
           const element = document.getElementById('qr-reader');
           if (element && element.parentNode) {
-            // call stop() then clear() if available
-            // @ts-ignore
-            if (typeof scannerRef.current.stop === 'function') {
+            // call stop() then clear() if available; attach catch if a promise is returned
+            try {
               // @ts-ignore
-              scannerRef.current.stop().catch(() => {});
-            }
-            // @ts-ignore
-            if (typeof scannerRef.current.clear === 'function') {
+              if (typeof scannerRef.current.stop === 'function') {
+                // @ts-ignore
+                const stopRes = scannerRef.current.stop();
+                if (stopRes && typeof (stopRes as any).catch === 'function') {
+                  (stopRes as any).catch(() => {});
+                }
+              }
+            } catch (_) {}
+            try {
               // @ts-ignore
-              scannerRef.current.clear().catch(() => {});
-            }
+              if (typeof scannerRef.current.clear === 'function') {
+                // @ts-ignore
+                const clearRes = scannerRef.current.clear();
+                if (clearRes && typeof (clearRes as any).catch === 'function') {
+                  (clearRes as any).catch(() => {});
+                }
+              }
+            } catch (_) {}
           }
         } catch (error) {
           // Ignore errors during unmount
@@ -98,7 +108,12 @@ export default function QRScannerPage() {
         try {
           const element = document.getElementById('qr-reader');
           if (element && element.parentNode) {
-            await scannerRef.current.clear().catch(() => {});
+            try {
+              // @ts-ignore
+              await scannerRef.current.clear();
+            } catch (_) {
+              // ignore
+            }
           }
         } catch (e) {
           console.log('Error clearing previous scanner:', e);
@@ -159,7 +174,7 @@ export default function QRScannerPage() {
         if (cameras && cameras.length) {
           // Try to pick a camera with 'back' or 'rear' in label, otherwise the first camera
           const preferred = cameras.find((c: any) => /back|rear|environment/i.test(c.label || '')) || cameras[0];
-          cameraId = preferred.id || preferred.deviceId || null;
+          cameraId = preferred.id || null;
         }
       } catch (e) {
         // ignore, will fallback to default
@@ -215,14 +230,24 @@ export default function QRScannerPage() {
           // If using Html5Qrcode instance, stop the camera first then clear
           // @ts-ignore
           if (typeof scannerRef.current.stop === 'function') {
-            // @ts-ignore
-            await scannerRef.current.stop();
+            try {
+              // @ts-ignore
+              const stopRes = scannerRef.current.stop();
+              if (stopRes && typeof (stopRes as any).catch === 'function') {
+                (stopRes as any).catch(() => {});
+              }
+            } catch (_) {}
           }
           // clear UI
           // @ts-ignore
           if (typeof scannerRef.current.clear === 'function') {
-            // @ts-ignore
-            await scannerRef.current.clear();
+            try {
+              // @ts-ignore
+              const clearRes = scannerRef.current.clear();
+              if (clearRes && typeof (clearRes as any).catch === 'function') {
+                (clearRes as any).catch(() => {});
+              }
+            } catch (_) {}
           }
         } catch (e) {
           // fallback: attempt to stop any active video tracks
