@@ -595,6 +595,25 @@ export default function QRScannerPage() {
                         console.warn('decodeFromCanvas failed', e);
                       }
 
+                      // 4) Final fallback: use jsQR library on image data
+                      try {
+                        // dynamic import so build doesn't fail if package missing
+                        // @ts-ignore
+                        const jsqr = await import('jsqr');
+                        const jsQR = jsqr?.default || jsqr;
+                        if (jsQR && typeof jsQR === 'function') {
+                          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                          // @ts-ignore
+                          const code = jsQR(imageData.data, imageData.width, imageData.height);
+                          if (code && code.data) {
+                            handleCameraScan(code.data);
+                            return;
+                          }
+                        }
+                      } catch (jsErr) {
+                        console.warn('jsQR fallback failed:', jsErr);
+                      }
+
                       toast.error('Unable to decode QR from the selected image');
                     } catch (err: any) {
                       console.error('Error decoding file:', err);
