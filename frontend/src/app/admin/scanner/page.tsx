@@ -25,6 +25,8 @@ export default function QRScannerPage() {
   const lastScannedRef = useRef<string>('');
   const scannerRef = useRef<Html5Qrcode | Html5QrcodeScanner | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [isDecoding, setIsDecoding] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -519,7 +521,10 @@ export default function QRScannerPage() {
                   onChange={async (e) => {
                     const f = e.target.files?.[0];
                     if (!f) return;
+                    setIsDecoding(true);
                     try {
+                      const previewUrl = URL.createObjectURL(f);
+                      setUploadPreview(previewUrl);
                       toast('Decoding image...');
 
                       // 1) Try Html5Qrcode.scanFile (if provided by the lib)
@@ -539,16 +544,20 @@ export default function QRScannerPage() {
                       }
 
                       // 2) Draw image to canvas and try BarcodeDetector (modern browsers)
-                      const url = URL.createObjectURL(f);
                       const img = new Image();
-                      img.src = url;
+                      img.src = previewUrl;
                       await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
                       const canvas = document.createElement('canvas');
-                      canvas.width = img.naturalWidth || img.width;
-                      canvas.height = img.naturalHeight || img.height;
+                      // downscale large images for performance
+                      const MAX = 1200;
+                      const w = img.naturalWidth || img.width;
+                      const h = img.naturalHeight || img.height;
+                      const scale = Math.min(1, MAX / Math.max(w, h));
+                      canvas.width = Math.floor(w * scale);
+                      canvas.height = Math.floor(h * scale);
                       const ctx = canvas.getContext('2d');
                       if (!ctx) throw new Error('Canvas context unavailable');
-                      ctx.drawImage(img, 0, 0);
+                      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
                       // Try browser BarcodeDetector first
                       try {
@@ -562,7 +571,6 @@ export default function QRScannerPage() {
                             const val = results[0].rawValue || results[0].raw_value || results[0].rawdata;
                             if (val) {
                               handleCameraScan(val.toString());
-                              URL.revokeObjectURL(url);
                               return;
                             }
                           }
@@ -579,7 +587,6 @@ export default function QRScannerPage() {
                           const r = await (Html5Qrcode as any).decodeFromCanvas(canvas);
                           if (r) {
                             handleCameraScan(r);
-                            URL.revokeObjectURL(url);
                             return;
                           }
                         }
@@ -587,13 +594,18 @@ export default function QRScannerPage() {
                         console.warn('decodeFromCanvas failed', e);
                       }
 
-                      URL.revokeObjectURL(url);
                       toast.error('Unable to decode QR from the selected image');
                     } catch (err: any) {
                       console.error('Error decoding file:', err);
                       toast.error('Failed to decode image');
                     } finally {
+                      setIsDecoding(false);
+                      // clear file input and remove preview after short delay
                       if (fileInputRef.current) fileInputRef.current.value = '';
+                      setTimeout(() => {
+                        if (uploadPreview) URL.revokeObjectURL(uploadPreview);
+                        setUploadPreview(null);
+                      }, 3000);
                     }
                   }}
                 />
