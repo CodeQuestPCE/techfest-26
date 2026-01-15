@@ -24,6 +24,7 @@ export default function QRScannerPage() {
   const [cameraCheckMsg, setCameraCheckMsg] = useState<string | null>(null);
   const lastScannedRef = useRef<string>('');
   const scannerRef = useRef<Html5Qrcode | Html5QrcodeScanner | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
