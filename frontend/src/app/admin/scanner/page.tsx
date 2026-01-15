@@ -675,8 +675,8 @@ export default function QRScannerPage() {
                             <User className="w-5 h-5 text-purple-600" />
                             <span className="font-semibold text-gray-700">Attendee Details</span>
                           </div>
-                          <p className="text-gray-900 font-bold text-lg">{result.data.registration?.user?.name}</p>
-                          <p className="text-gray-600 text-sm">{result.data.registration?.user?.email}</p>
+                          <p className="text-gray-900 font-bold text-lg">{result.data.registration?.user?.name || result.data.user?.name}</p>
+                          <p className="text-gray-600 text-sm">{result.data.registration?.user?.email || result.data.user?.email}</p>
                         </div>
 
                         <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200">
@@ -684,9 +684,11 @@ export default function QRScannerPage() {
                             <Calendar className="w-5 h-5 text-purple-600" />
                             <span className="font-semibold text-gray-700">Event Details</span>
                           </div>
-                          <p className="text-gray-900 font-bold text-lg">{result.data.registration?.event?.title}</p>
+                          <p className="text-gray-900 font-bold text-lg">{result.data.registration?.event?.title || result.data.event?.title}</p>
                           <p className="text-purple-700 text-sm font-semibold">
-                            Type: {result.data.registration?.registrationType?.toUpperCase()}
+                            Type: {(
+                              result.data.registration?.registrationType || result.data.event?.eventType || result.data.event?.type || ''
+                            ).toString().toUpperCase()}
                           </p>
                         </div>
 
