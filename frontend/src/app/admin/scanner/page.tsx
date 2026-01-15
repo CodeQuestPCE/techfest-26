@@ -522,8 +522,9 @@ export default function QRScannerPage() {
                     const f = e.target.files?.[0];
                     if (!f) return;
                     setIsDecoding(true);
+                    let previewUrl: string | null = null;
                     try {
-                      const previewUrl = URL.createObjectURL(f);
+                      previewUrl = URL.createObjectURL(f);
                       setUploadPreview(previewUrl);
                       toast('Decoding image...');
 
