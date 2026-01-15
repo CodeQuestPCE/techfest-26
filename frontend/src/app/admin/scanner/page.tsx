@@ -603,7 +603,9 @@ export default function QRScannerPage() {
                       // clear file input and remove preview after short delay
                       if (fileInputRef.current) fileInputRef.current.value = '';
                       setTimeout(() => {
-                        if (uploadPreview) URL.revokeObjectURL(uploadPreview);
+                        try {
+                          if (previewUrl) URL.revokeObjectURL(previewUrl);
+                        } catch (_) {}
                         setUploadPreview(null);
                       }, 3000);
                     }
