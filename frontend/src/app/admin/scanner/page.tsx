@@ -521,36 +521,60 @@ export default function QRScannerPage() {
                     if (!f) return;
                     try {
                       toast('Decoding image...');
-                      // Try Html5Qrcode.scanFile if available
-                      // @ts-ignore
-                      if (Html5Qrcode && typeof Html5Qrcode.scanFile === 'function') {
-                        try {
+
+                      // 1) Try Html5Qrcode.scanFile (if provided by the lib)
+                      try {
+                        // @ts-ignore
+                        if (Html5Qrcode && typeof (Html5Qrcode as any).scanFile === 'function') {
                           // @ts-ignore
-                          const decoded = await Html5Qrcode.scanFile(f, true);
+                          const decoded = await (Html5Qrcode as any).scanFile(f, true);
                           const decodedText = Array.isArray(decoded) ? decoded[0] : decoded;
                           if (decodedText) {
                             handleCameraScan(decodedText);
                             return;
                           }
-                        } catch (err) {
-                          console.warn('Html5Qrcode.scanFile failed:', err);
                         }
+                      } catch (err) {
+                        console.warn('Html5Qrcode.scanFile failed:', err);
                       }
 
-                      // Fallback: draw to canvas and try decode via Html5Qrcode decodeFromCanvas if present
+                      // 2) Draw image to canvas and try BarcodeDetector (modern browsers)
                       const url = URL.createObjectURL(f);
                       const img = new Image();
                       img.src = url;
                       await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
                       const canvas = document.createElement('canvas');
-                      canvas.width = img.naturalWidth;
-                      canvas.height = img.naturalHeight;
+                      canvas.width = img.naturalWidth || img.width;
+                      canvas.height = img.naturalHeight || img.height;
                       const ctx = canvas.getContext('2d');
                       if (!ctx) throw new Error('Canvas context unavailable');
                       ctx.drawImage(img, 0, 0);
-                      // @ts-ignore
-                      if (Html5Qrcode && typeof (Html5Qrcode as any).decodeFromCanvas === 'function') {
-                        try {
+
+                      // Try browser BarcodeDetector first
+                      try {
+                        // @ts-ignore
+                        if (typeof (window as any).BarcodeDetector === 'function') {
+                          // @ts-ignore
+                          const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+                          // @ts-ignore
+                          const results = await detector.detect(canvas);
+                          if (results && results.length) {
+                            const val = results[0].rawValue || results[0].raw_value || results[0].rawdata;
+                            if (val) {
+                              handleCameraScan(val.toString());
+                              URL.revokeObjectURL(url);
+                              return;
+                            }
+                          }
+                        }
+                      } catch (bdErr) {
+                        console.warn('BarcodeDetector failed:', bdErr);
+                      }
+
+                      // 3) Fallback: try Html5Qrcode.decodeFromCanvas (if available in this version)
+                      try {
+                        // @ts-ignore
+                        if (Html5Qrcode && typeof (Html5Qrcode as any).decodeFromCanvas === 'function') {
                           // @ts-ignore
                           const r = await (Html5Qrcode as any).decodeFromCanvas(canvas);
                           if (r) {
@@ -558,10 +582,11 @@ export default function QRScannerPage() {
                             URL.revokeObjectURL(url);
                             return;
                           }
-                        } catch (e) {
-                          console.warn('decodeFromCanvas failed', e);
                         }
+                      } catch (e) {
+                        console.warn('decodeFromCanvas failed', e);
                       }
+
                       URL.revokeObjectURL(url);
                       toast.error('Unable to decode QR from the selected image');
                     } catch (err: any) {
