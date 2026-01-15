@@ -508,6 +508,78 @@ export default function QRScannerPage() {
                 {cameraCheckMsg && <span className="text-sm text-gray-700">{cameraCheckMsg}</span>}
               </div>
 
+              {/* Upload QR Image from device storage */}
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    try {
+                      toast('Decoding image...');
+                      // Try Html5Qrcode.scanFile if available
+                      // @ts-ignore
+                      if (Html5Qrcode && typeof Html5Qrcode.scanFile === 'function') {
+                        try {
+                          // @ts-ignore
+                          const decoded = await Html5Qrcode.scanFile(f, true);
+                          const decodedText = Array.isArray(decoded) ? decoded[0] : decoded;
+                          if (decodedText) {
+                            handleCameraScan(decodedText);
+                            return;
+                          }
+                        } catch (err) {
+                          console.warn('Html5Qrcode.scanFile failed:', err);
+                        }
+                      }
+
+                      // Fallback: draw to canvas and try decode via Html5Qrcode decodeFromCanvas if present
+                      const url = URL.createObjectURL(f);
+                      const img = new Image();
+                      img.src = url;
+                      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+                      const canvas = document.createElement('canvas');
+                      canvas.width = img.naturalWidth;
+                      canvas.height = img.naturalHeight;
+                      const ctx = canvas.getContext('2d');
+                      if (!ctx) throw new Error('Canvas context unavailable');
+                      ctx.drawImage(img, 0, 0);
+                      // @ts-ignore
+                      if (Html5Qrcode && typeof (Html5Qrcode as any).decodeFromCanvas === 'function') {
+                        try {
+                          // @ts-ignore
+                          const r = await (Html5Qrcode as any).decodeFromCanvas(canvas);
+                          if (r) {
+                            handleCameraScan(r);
+                            URL.revokeObjectURL(url);
+                            return;
+                          }
+                        } catch (e) {
+                          console.warn('decodeFromCanvas failed', e);
+                        }
+                      }
+                      URL.revokeObjectURL(url);
+                      toast.error('Unable to decode QR from the selected image');
+                    } catch (err: any) {
+                      console.error('Error decoding file:', err);
+                      toast.error('Failed to decode image');
+                    } finally {
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium"
+                >
+                  Upload QR Image
+                </button>
+                <p className="text-sm text-gray-600">or scan using camera</p>
+              </div>
+
               {cameraActive ? (
                 <div className="relative">
                   <div id="qr-reader" style={{ width: '100%', minHeight: '400px' }}></div>
