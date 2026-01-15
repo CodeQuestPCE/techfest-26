@@ -19,11 +19,16 @@ export default function QRScannerPage() {
   const [cameraActive, setCameraActive] = useState(false);
   const [scanMode, setScanMode] = useState<'camera' | 'manual'>('camera');
   const [mounted, setMounted] = useState(false);
+  const [isSecure, setIsSecure] = useState<boolean>(true);
+  const [inIframe, setInIframe] = useState<boolean>(false);
+  const [cameraCheckMsg, setCameraCheckMsg] = useState<string | null>(null);
   const lastScannedRef = useRef<string>('');
   const scannerRef = useRef<Html5Qrcode | Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    setIsSecure(!!(typeof window !== 'undefined' && window.isSecureContext));
+    setInIframe(typeof window !== 'undefined' && window.self !== window.top);
   }, []);
 
   useEffect(() => {
@@ -154,8 +159,10 @@ export default function QRScannerPage() {
         // Request camera permission preferring the back camera on mobile
         const tempStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
         tempStream.getTracks().forEach((t) => t.stop());
+        setCameraCheckMsg('Permission granted');
       } catch (err: any) {
         console.error('User denied camera permission or camera not available:', err);
+        setCameraCheckMsg(err?.message || 'Permission request failed');
         if (err && err.name === 'NotAllowedError') {
           toast.error('Camera permission denied. Please allow camera access in your browser settings.');
         } else if (err && err.name === 'NotFoundError') {
@@ -465,6 +472,40 @@ export default function QRScannerPage() {
                     </>
                   )}
                 </button>
+              </div>
+
+              {/* Camera environment checks */}
+              {!isSecure && (
+                <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-300 rounded">
+                  <p className="text-sm text-yellow-800 font-semibold">Insecure context: Camera access requires HTTPS or localhost.</p>
+                </div>
+              )}
+              {inIframe && (
+                <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-300 rounded">
+                  <p className="text-sm text-yellow-800 font-semibold">Page is in an iframe — some browsers block camera access inside iframes. Open in a top-level tab.</p>
+                </div>
+              )}
+              <div className="mb-4 flex items-center gap-3">
+                <button
+                  onClick={async () => {
+                    setCameraCheckMsg(null);
+                    try {
+                      if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+                        setCameraCheckMsg('getUserMedia not supported');
+                        return;
+                      }
+                      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+                      s.getTracks().forEach((t) => t.stop());
+                      setCameraCheckMsg('Permission granted');
+                    } catch (e: any) {
+                      setCameraCheckMsg(e?.message || 'Permission denied');
+                    }
+                  }}
+                  className="px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium"
+                >
+                  Check Camera Access
+                </button>
+                {cameraCheckMsg && <span className="text-sm text-gray-700">{cameraCheckMsg}</span>}
               </div>
 
               {cameraActive ? (
