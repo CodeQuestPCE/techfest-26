@@ -36,3 +36,6 @@ coverage/
 # Build
 dist/
 build/
+
+# Ops/maintenance scripts (ops-only). Add to gitignore if you do not want them tracked.
+ops/
