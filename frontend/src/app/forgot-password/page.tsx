@@ -34,10 +34,10 @@ export default function ForgotPasswordPage() {
               Check Your Email
             </h2>
             <p className="text-gray-600 mb-6">
-              We've sent a password reset link to <span className="font-semibold text-purple-600">{email}</span>
+              We&apos;ve sent a password reset link to <span className="font-semibold text-purple-600">{email}</span>
             </p>
             <p className="text-sm text-gray-500 mb-8">
-              If you don't see the email, check your spam folder.
+              If you don&apos;t see the email, check your spam folder.
             </p>
             <Link
               href="/login"
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
             Forgot Password?
           </h1>
           <p className="text-gray-600">
-            No worries! Enter your email and we'll send you a reset link.
+            No worries! Enter your email and we&apos;ll send you a reset link.
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
 
         {/* Sign Up Link */}
         <p className="text-center mt-6 text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="font-bold text-purple-600 hover:text-pink-600 transition-colors">
             Sign up for free
           </Link>
