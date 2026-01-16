@@ -170,3 +170,28 @@ exports.sendPasswordResetEmail = async (email, name, resetUrl) => {
     return false;
   }
 };
+
+// Send registration resubmitted email (after user edits and resubmits)
+exports.sendRegistrationResubmittedEmail = async (email, name, eventTitle) => {
+  try {
+    const transporter = createTransporter();
+
+    await transporter.sendMail({
+      from: `"TechFest Platform" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Registration Resubmitted - Payment Re-verification',
+      html: `
+        <h2>Hello ${name},</h2>
+        <p>Your registration for <strong>${eventTitle}</strong> has been updated and resubmitted for verification.</p>
+        <p><strong>Status:</strong> Pending Verification</p>
+        <p>Our admin team will re-check your payment details and notify you once verification completes.</p>
+        <br/>
+        <p>Best regards,<br/>TechFest Team</p>
+      `
+    });
+
+    console.log('Registration resubmitted email sent successfully');
+  } catch (error) {
+    console.error('Error sending registration resubmitted email:', error.message);
+  }
+};
