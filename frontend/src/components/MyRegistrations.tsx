@@ -198,8 +198,11 @@ export default function MyRegistrations() {
               )}
               {registration.status === 'rejected' && (
                 <div className="mt-4 flex gap-3">
-                  <Link href={`/registrations/${registration._id}/edit`}>
-                    <a className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Edit & Resubmit</a>
+                  <Link
+                    href={`/registrations/${registration._id}/edit`}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  >
+                    Edit & Resubmit
                   </Link>
                 </div>
               )}
