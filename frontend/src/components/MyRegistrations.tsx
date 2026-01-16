@@ -104,10 +104,10 @@ export default function MyRegistrations() {
                         <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
                           👑
                         </span>
-                        <span className="font-semibold text-gray-900">{registration.user?.name || 'You'} (Leader)</span>
+                        <span className="font-semibold text-gray-900">{registration.user?.name || registration.attendeeInfo?.name || 'You'} (Leader)</span>
                       </div>
-                      <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email}</p>
-                      <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone}</p>
+                      <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email || registration.attendeeInfo?.email}</p>
+                      <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone || registration.attendeeInfo?.phone}</p>
                     </div>
                     {/* Other Team Members */}
                     {registration.teamMembers.map((member: any, idx: number) => (
@@ -116,7 +116,7 @@ export default function MyRegistrations() {
                           <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
                             {idx + 2}
                           </span>
-                          <span className="font-semibold text-gray-900">{member.name}</span>
+                          <span className="font-semibold text-gray-900">{member.name || member?.fullName || 'Member'}</span>
                         </div>
                         <p className="text-xs text-gray-600 ml-8">📧 {member.email}</p>
                         <p className="text-xs text-gray-600 ml-8">📱 {member.phone}</p>
@@ -134,10 +134,10 @@ export default function MyRegistrations() {
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border-2 border-purple-300">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">👑</span>
-                        <span className="font-semibold text-gray-900">{registration.user?.name || 'Participant'}</span>
+                        <span className="font-semibold text-gray-900">{registration.user?.name || registration.attendeeInfo?.name || 'Participant'}</span>
                       </div>
-                      <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email}</p>
-                      <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone}</p>
+                      <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email || registration.attendeeInfo?.email}</p>
+                      <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone || registration.attendeeInfo?.phone}</p>
                     </div>
                   </div>
                 </div>
