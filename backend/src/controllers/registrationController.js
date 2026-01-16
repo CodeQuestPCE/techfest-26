@@ -4,6 +4,7 @@ const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 
 const emailService = require('../utils/emailService');
 const cloudinaryUpload = require('../middleware/cloudinaryUpload');
@@ -270,9 +271,14 @@ exports.getUserRegistrations = async (req, res) => {
 // @desc    Get single registration
 exports.getRegistration = async (req, res) => {
   try {
+    // Validate registration id early to avoid CastError
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid registration id' });
+    }
+
     const registration = await Registration.findById(req.params.id)
       .populate('event')
-      .populate('user', 'name email');
+      .populate('user', 'name email phone');
 
     if (!registration) {
       return res.status(404).json({
@@ -281,12 +287,19 @@ exports.getRegistration = async (req, res) => {
       });
     }
 
-    // Check ownership
-    if (registration.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized'
-      });
+    // Check ownership (be defensive if `registration.user` is missing or not populated)
+    const regUserId = registration.user && registration.user._id
+      ? registration.user._id.toString()
+      : registration.user
+        ? registration.user.toString()
+        : null;
+
+    if (!regUserId && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    if (regUserId && regUserId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
     res.json({
