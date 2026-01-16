@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { Upload, X, Settings as SettingsIcon, Shield, Home, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import AdminMobileMenu from '@/components/AdminMobileMenu';
 
 export default function PaymentSettings() {
@@ -205,18 +206,20 @@ export default function PaymentSettings() {
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <img
-                src={
-                  previewUrl.startsWith('http')
-                    ? previewUrl
-                    : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${previewUrl}`
-                }
-                alt="Payment QR Code Preview"
-                className="w-64 h-64 object-contain border-2 border-gray-300 rounded-lg mx-auto"
-                onError={(e) => {
-                  e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256"%3E%3Crect fill="%23f0f0f0" width="256" height="256"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="14"%3EInvalid Image%3C/text%3E%3C/svg%3E';
-                }}
-              />
+              <div className="mx-auto">
+                <Image
+                  src={
+                    previewUrl.startsWith('http')
+                      ? previewUrl
+                      : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${previewUrl}`
+                  }
+                  alt="Payment QR Code Preview"
+                  width={256}
+                  height={256}
+                  className="object-contain border-2 border-gray-300 rounded-lg"
+                  unoptimized
+                />
+              </div>
             </div>
           )}
         </div>

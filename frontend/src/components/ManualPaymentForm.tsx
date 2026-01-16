@@ -275,7 +275,7 @@ export default function ManualPaymentForm({ event }: { event: any }) {
                 {teamMembers.map((member, index) => (
                   <div key={index} className="p-4 rounded-lg bg-gray-50 relative">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-sm">Member {index + 1}</span>
+                      <span className="font-medium text-sm">Member {index + 2}</span>
                       <button
                         type="button"
                         onClick={() => removeTeamMember(index)}

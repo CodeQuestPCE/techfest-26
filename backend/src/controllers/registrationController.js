@@ -28,6 +28,40 @@ exports.createRegistration = async (req, res) => {
       }
     }
 
+    // Fetch current user early so we can sanitize teamMembers (remove leader if accidentally included)
+    const currentUser = await User.findById(req.user.id).select('name email phone');
+
+    // Ensure teamMembers is an array and remove any entry that matches the leader (by email/phone/name)
+    if (!Array.isArray(teamMembers)) {
+      teamMembers = [];
+    } else {
+      teamMembers = teamMembers.filter((m, idx, arr) => {
+        if (!m) return false;
+        const memEmail = (m.email || '').toString().toLowerCase();
+        const memPhone = (m.phone || '').toString();
+        const memName = (m.name || '').toString().trim().toLowerCase();
+
+        // Exclude if matches leader
+        if ((currentUser.email && memEmail && memEmail === (currentUser.email || '').toString().toLowerCase()) ||
+            (currentUser.phone && memPhone && memPhone === (currentUser.phone || '').toString()) ||
+            (currentUser.name && memName && memName === (currentUser.name || '').toString().toLowerCase())) {
+          return false;
+        }
+
+        // Deduplicate by email or phone among other members (keep first occurrence)
+        for (let j = 0; j < idx; j++) {
+          const prev = arr[j] || {};
+          const prevEmail = (prev.email || '').toString().toLowerCase();
+          const prevPhone = (prev.phone || '').toString();
+          if ((memEmail && prevEmail && memEmail === prevEmail) || (memPhone && prevPhone && memPhone === prevPhone)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    }
+
     // Convert quantity to number
     quantity = parseInt(quantity, 10);
 
