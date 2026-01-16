@@ -83,7 +83,7 @@ export default function QRScannerPage() {
     if (scanMode === 'manual' && cameraActive) {
       stopCamera();
     }
-  }, [scanMode]);
+  }, [scanMode, cameraActive]);
   const handleLogout = () => {
     logout();
     router.push('/');
@@ -668,7 +668,7 @@ export default function QRScannerPage() {
                 <div className="aspect-video rounded-xl border-4 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50">
                   <Camera className="w-16 h-16 text-gray-400 mb-4" />
                   <p className="text-gray-600 font-semibold mb-2">Camera Ready</p>
-                  <p className="text-gray-500 text-sm">Click "Start Camera" to begin scanning</p>
+                  <p className="text-gray-500 text-sm">Click &quot;Start Camera&quot; to begin scanning</p>
                 </div>
               )}
             </div>
@@ -802,7 +802,7 @@ export default function QRScannerPage() {
               <div>
                 <h4 className="font-semibold text-blue-800 mb-2">📷 Camera Mode:</h4>
                 <ul className="space-y-1 text-blue-700 text-sm">
-                  <li>• Click "Start Camera" button</li>
+                  <li>• Click &quot;Start Camera&quot; button</li>
                   <li>• Point camera at QR code</li>
                   <li>• Auto-scans when detected</li>
                   <li>• Instant validation feedback</li>
