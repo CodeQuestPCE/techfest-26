@@ -49,7 +49,7 @@ export default function AmbassadorDashboardPage() {
     if (isAuthenticated() && user?.role === 'ambassador' && !user?.referralCode && !isGenerating) {
       generateCode();
     }
-  }, [user?.referralCode, user?.role, isAuthenticated, isGenerating]);
+  }, [user?.referralCode, user?.role, isAuthenticated, isGenerating, generateCode]);
 
   if (!isAuthenticated() || user?.role !== 'ambassador') {
     return null;

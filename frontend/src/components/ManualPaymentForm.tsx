@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Upload, X, Plus, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/authStore';
 
 const registrationSchema = z.object({
@@ -335,7 +336,15 @@ export default function ManualPaymentForm({ event }: { event: any }) {
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             {previewUrl ? (
               <div className="relative">
-                <img src={previewUrl} alt="Preview" className="max-h-64 mx-auto rounded-lg" />
+                <Image
+                  src={previewUrl}
+                  alt="Preview"
+                  width={400}
+                  height={300}
+                  className="max-h-64 mx-auto rounded-lg object-contain"
+                  unoptimized
+                  onError={() => { setPreviewUrl(null); setSelectedFile(null); }}
+                />
                 <button
                   type="button"
                   onClick={() => {

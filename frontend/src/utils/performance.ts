@@ -307,7 +307,7 @@ export const registerServiceWorker = async (): Promise<void> => {
   }
 };
 
-export default {
+const performanceUtils = {
   measureRenderTime,
   debounce,
   throttle,
@@ -325,3 +325,5 @@ export default {
   optimizedQueryConfig,
   registerServiceWorker,
 };
+
+export default performanceUtils;

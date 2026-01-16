@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import { Check, X, Eye, Clock, CheckCircle2, XCircle, TrendingUp, Users, IndianRupee, Calendar } from 'lucide-react'
+import Image from 'next/image'
 import computeAmount from '@/lib/computeAmount'
 
 export default function AdminDashboard() {
@@ -245,31 +246,24 @@ export default function AdminDashboard() {
                   </h4>
                   {registration.paymentScreenshotUrl ? (
                     <div className="relative group">
-                      <img
-                        src={registration.paymentScreenshotUrl.startsWith('http')
-                          ? registration.paymentScreenshotUrl
-                          : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`}
-                        alt="Payment Screenshot"
-                        className="w-full rounded-2xl border-4 border-gray-200 cursor-pointer hover:border-purple-400 transition-all shadow-lg hover:shadow-2xl"
-                        onClick={() => {
-                          const fullUrl = registration.paymentScreenshotUrl.startsWith('http')
+                      <div className="w-full rounded-2xl overflow-hidden">
+                        <Image
+                          src={registration.paymentScreenshotUrl.startsWith('http')
                             ? registration.paymentScreenshotUrl
-                            : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
-                          console.log('Opening image:', fullUrl);
-                          window.open(fullUrl, '_blank');
-                        }}
-                        onError={(e) => {
-                          const fullUrl = registration.paymentScreenshotUrl.startsWith('http')
-                            ? registration.paymentScreenshotUrl
-                            : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
-                          console.error('Image load error. URL:', fullUrl);
-                          console.error('PaymentScreenshotUrl from backend:', registration.paymentScreenshotUrl);
-                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not found%3C/text%3E%3C/svg%3E';
-                        }}
-                        onLoad={() => {
-                          console.log('Image loaded successfully:', registration.paymentScreenshotUrl);
-                        }}
-                      />
+                            : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`}
+                          alt="Payment Screenshot"
+                          width={800}
+                          height={600}
+                          className="w-full rounded-2xl border-4 border-gray-200 transition-all shadow-lg hover:shadow-2xl"
+                          unoptimized
+                          onClick={() => {
+                            const fullUrl = registration.paymentScreenshotUrl.startsWith('http')
+                              ? registration.paymentScreenshotUrl
+                              : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${registration.paymentScreenshotUrl}`;
+                            window.open(fullUrl, '_blank');
+                          }}
+                        />
+                      </div>
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-2xl transition-all flex items-center justify-center">
                         <span className="opacity-0 group-hover:opacity-100 bg-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all">
                           Click to enlarge 🔍
