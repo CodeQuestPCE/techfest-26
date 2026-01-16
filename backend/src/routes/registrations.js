@@ -31,6 +31,11 @@ router.get('/:id', protect, registrationController.getRegistration);
 // @access  Private
 router.put('/:id/cancel', protect, registrationController.cancelRegistration);
 
+// @route   PATCH /api/registrations/:id
+// @desc    Edit a rejected registration and resubmit (owner)
+// @access  Private
+router.patch('/:id', protect, memoryUpload.single('paymentScreenshot'), registrationController.updateRegistration);
+
 // @route   GET /api/registrations/event/:eventId
 // @desc    Get event registrations (organizer/admin)
 // @access  Private

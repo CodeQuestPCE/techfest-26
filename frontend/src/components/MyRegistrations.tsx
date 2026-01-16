@@ -1,5 +1,6 @@
-'use client'
+ 'use client'
 
+import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { Download, CheckCircle, Clock, XCircle } from 'lucide-react'
@@ -193,6 +194,13 @@ export default function MyRegistrations() {
                       return 'No reason provided';
                     })()}
                   </p>
+                </div>
+              )}
+              {registration.status === 'rejected' && (
+                <div className="mt-4 flex gap-3">
+                  <Link href={`/registrations/${registration._id}/edit`}>
+                    <a className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Edit & Resubmit</a>
+                  </Link>
                 </div>
               )}
             </div>

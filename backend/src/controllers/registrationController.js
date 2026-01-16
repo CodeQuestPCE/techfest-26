@@ -384,3 +384,114 @@ exports.getEventRegistrations = async (req, res) => {
     });
   }
 };
+
+// @desc    Update (edit) a rejected registration and resubmit for verification
+exports.updateRegistration = async (req, res) => {
+  try {
+    const registration = await Registration.findById(req.params.id);
+
+    if (!registration) {
+      return res.status(404).json({ success: false, message: 'Registration not found' });
+    }
+
+    // Only owner can edit (admin can also, but for resubmit this is owner flow)
+    if (registration.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    // Only allow edits when registration is rejected (explicit resubmit flow)
+    if (registration.status !== 'rejected') {
+      return res.status(400).json({ success: false, message: 'Only rejected registrations can be edited and resubmitted' });
+    }
+
+    let { teamName, teamMembers, utrNumber } = req.body;
+
+    // Parse teamMembers if string
+    if (typeof teamMembers === 'string') {
+      try {
+        teamMembers = JSON.parse(teamMembers);
+      } catch (err) {
+        return res.status(400).json({ success: false, message: 'Invalid team members format' });
+      }
+    }
+
+    // Fetch current user to sanitize team members (remove leader duplicates)
+    const currentUser = await User.findById(req.user.id).select('name email phone');
+
+    if (!Array.isArray(teamMembers)) teamMembers = [];
+    else {
+      teamMembers = teamMembers.filter((m, idx, arr) => {
+        if (!m) return false;
+        const memEmail = (m.email || '').toString().toLowerCase();
+        const memPhone = (m.phone || '').toString();
+        const memName = (m.name || '').toString().trim().toLowerCase();
+
+        if ((currentUser.email && memEmail && memEmail === (currentUser.email || '').toString().toLowerCase()) ||
+            (currentUser.phone && memPhone && memPhone === (currentUser.phone || '').toString()) ||
+            (currentUser.name && memName && memName === (currentUser.name || '').toString().toLowerCase())) {
+          return false;
+        }
+
+        for (let j = 0; j < idx; j++) {
+          const prev = arr[j] || {};
+          const prevEmail = (prev.email || '').toString().toLowerCase();
+          const prevPhone = (prev.phone || '').toString();
+          if ((memEmail && prevEmail && memEmail === prevEmail) || (memPhone && prevPhone && memPhone === prevPhone)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    }
+
+    // Validate team size constraints if this is a team event
+    const event = await Event.findById(registration.event);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+    if (event.eventType === 'team') {
+      const otherCount = Array.isArray(teamMembers) ? teamMembers.length : 0;
+      const total = 1 + otherCount;
+      if (!teamName || total < event.minTeamSize || total > event.maxTeamSize) {
+        return res.status(400).json({ success: false, message: `Team size must be between ${event.minTeamSize} and ${event.maxTeamSize}` });
+      }
+    }
+
+    // Check if utr changed and is unique (exclude current registration)
+    if (utrNumber && utrNumber !== registration.utrNumber) {
+      const existingUTR = await Registration.findOne({ utrNumber });
+      if (existingUTR) {
+        return res.status(400).json({ success: false, message: 'UTR number already used. Please use a different UTR number.' });
+      }
+    }
+
+    // If a new payment screenshot was uploaded, replace it
+    if (req.file && req.file.buffer) {
+      try {
+        const result = await cloudinaryUpload(req.file.buffer, req.file.mimetype);
+        registration.paymentScreenshotUrl = result.secure_url;
+      } catch (err) {
+        return res.status(500).json({ success: false, message: 'Failed to upload payment screenshot', error: err.message });
+      }
+    }
+
+    // Apply edits
+    if (typeof teamName === 'string') registration.teamName = teamName;
+    registration.teamMembers = teamMembers;
+    if (utrNumber) registration.utrNumber = utrNumber;
+
+    // Reset status to pending for re-verification
+    registration.status = 'pending';
+    registration.paymentStatus = 'pending';
+
+    await registration.save();
+
+    const user = await User.findById(req.user.id);
+    await emailService.sendRegistrationResubmittedEmail(user.email, user.name, event.title);
+
+    res.json({ success: true, message: 'Registration updated and resubmitted for verification', data: registration });
+  } catch (error) {
+    console.error('Update registration error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to update registration' });
+  }
+};
