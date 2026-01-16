@@ -94,9 +94,9 @@ export default function MyRegistrations() {
                 )}
               </div>
 
-              {registration.teamMembers && registration.teamMembers.length > 0 && (
+              {registration.event?.eventType === 'team' && (
                 <div className="border-t pt-4 mb-4">
-                  <p className="font-semibold mb-3 text-gray-900">Team Members ({registration.teamMembers.length + 1}):</p>
+                  <p className="font-semibold mb-3 text-gray-900">Team Members ({(registration.teamMembers?.length || 0) + 1}):</p>
                   <div className="grid md:grid-cols-2 gap-3">
                     {/* Team Leader (You) */}
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border-2 border-purple-300">
@@ -109,8 +109,9 @@ export default function MyRegistrations() {
                       <p className="text-xs text-gray-600 ml-8">📧 {registration.user?.email || registration.attendeeInfo?.email}</p>
                       <p className="text-xs text-gray-600 ml-8">📱 {registration.user?.phone || registration.attendeeInfo?.phone}</p>
                     </div>
-                    {/* Other Team Members */}
-                    {registration.teamMembers.map((member: any, idx: number) => (
+
+                    {/* Other Team Members (if any) */}
+                    {registration.teamMembers && registration.teamMembers.length > 0 && registration.teamMembers.map((member: any, idx: number) => (
                       <div key={idx} className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-200">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
