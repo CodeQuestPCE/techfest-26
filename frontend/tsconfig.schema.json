@@ -1,0 +1,18 @@
+{
+  "$id": "./tsconfig.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Local fallback schema for tsconfig.json to avoid remote fetch in offline/editor environments.",
+  "type": "object",
+  "properties": {
+    "compilerOptions": {
+      "type": "object"
+    },
+    "include": {
+      "type": ["array"]
+    },
+    "exclude": {
+      "type": ["array"]
+    }
+  },
+  "additionalProperties": true
+}

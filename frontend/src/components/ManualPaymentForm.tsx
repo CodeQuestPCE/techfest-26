@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,20 +23,8 @@ export default function ManualPaymentForm({ event }: { event: any }) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [teamMembers, setTeamMembers] = useState<Array<{ name: string; email: string; phone: string }>>([
-    { name: '', email: '', phone: '' },
-  ]);
-
-  // Auto-populate first team member with logged-in user details for team events
-  useEffect(() => {
-    if (event.eventType === 'team' && user) {
-      setTeamMembers([{
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || ''
-      }]);
-    }
-  }, [event.eventType, user]);
+  // `teamMembers` should contain OTHER members only; the registrant is the team leader
+  const [teamMembers, setTeamMembers] = useState<Array<{ name: string; email: string; phone: string }>>([]);
 
   // Fetch global payment settings
   const { data: paymentSettings } = useQuery({
@@ -46,6 +34,20 @@ export default function ManualPaymentForm({ event }: { event: any }) {
       return response.data.data;
     },
   });
+
+  const fallbackQrDataUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256"%3E%3Crect fill="%23f0f0f0" width="256" height="256"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="14"%3EQR Code Not Available%3C/text%3E%3C/svg%3E';
+  const [qrSrc, setQrSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (paymentSettings?.qrCodeUrl) {
+      const src = paymentSettings.qrCodeUrl.startsWith('http')
+        ? paymentSettings.qrCodeUrl
+        : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${paymentSettings.qrCodeUrl}`;
+      setQrSrc(src);
+    } else {
+      setQrSrc(null);
+    }
+  }, [paymentSettings]);
 
   const {
     register,
@@ -76,13 +78,14 @@ export default function ManualPaymentForm({ event }: { event: any }) {
   };
 
   const addTeamMember = () => {
-    if (teamMembers.length < event.maxTeamSize) {
+    const maxOther = Math.max(0, (event.maxTeamSize || 1) - 1);
+    if (teamMembers.length < maxOther) {
       setTeamMembers([...teamMembers, { name: '', email: '', phone: '' }]);
     }
   };
 
   const removeTeamMember = (index: number) => {
-    if (teamMembers.length > 1) {
+    if (teamMembers.length > 0) {
       setTeamMembers(teamMembers.filter((_, i) => i !== index));
     }
   };
@@ -100,14 +103,15 @@ export default function ManualPaymentForm({ event }: { event: any }) {
         return;
       }
 
-      // Validate team members for team events
+      // Validate team members for team events. `teamMembers` contains OTHER members; leader is the registrant.
       if (event.eventType === 'team') {
         const filledMembers = teamMembers.filter(m => m.name && m.email && m.phone);
-        if (filledMembers.length < event.minTeamSize) {
+        const totalMembers = 1 + filledMembers.length;
+        if (totalMembers < event.minTeamSize) {
           toast.error(`Team must have at least ${event.minTeamSize} members`);
           return;
         }
-        if (filledMembers.length > event.maxTeamSize) {
+        if (totalMembers > event.maxTeamSize) {
           toast.error(`Team cannot exceed ${event.maxTeamSize} members`);
           return;
         }
@@ -178,17 +182,14 @@ export default function ManualPaymentForm({ event }: { event: any }) {
             {paymentSettings?.qrCodeUrl ? (
               <div className="space-y-2">
                 <p className="text-sm text-gray-600 font-medium">Scan QR Code to Pay:</p>
-                <img
-                  src={
-                    paymentSettings.qrCodeUrl.startsWith('http')
-                      ? paymentSettings.qrCodeUrl
-                      : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}${paymentSettings.qrCodeUrl}`
-                  }
+                <Image
+                  src={qrSrc || fallbackQrDataUrl}
                   alt="Payment QR Code"
+                  width={256}
+                  height={256}
                   className="w-64 h-64 object-contain bg-white border-4 border-blue-300 rounded-xl shadow-lg mx-auto"
-                  onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"256\" height=\"256\"%3E%3Crect fill=\"%23f0f0f0\" width=\"256\" height=\"256\"/%3E%3Ctext fill=\"%23999\" x=\"50%25\" y=\"50%25\" text-anchor=\"middle\" dy=\".3em\" font-size=\"14\"%3EQR Code Not Available%3C/text%3E%3C/svg%3E';
-                  }}
+                  unoptimized
+                  onError={() => setQrSrc(fallbackQrDataUrl)}
                 />
                 <p className="text-xs text-center text-gray-500">Open any UPI app to scan</p>
               </div>
@@ -252,19 +253,29 @@ export default function ManualPaymentForm({ event }: { event: any }) {
               <button
                 type="button"
                 onClick={addTeamMember}
-                disabled={teamMembers.length >= event.maxTeamSize}
+                disabled={teamMembers.length >= Math.max(0, (event.maxTeamSize || 1) - 1)}
                 className="flex items-center gap-2 px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 <Plus className="w-4 h-4" />
                 Add Member
               </button>
             </div>
-            <div className="space-y-4">
-              {teamMembers.map((member, index) => (
-                <div key={index} className={`p-4 rounded-lg relative ${index === 0 ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200' : 'bg-gray-50'}`}>
+              <div className="space-y-4">
+                {/* Display leader (registrant) */}
+                <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 mb-2">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium text-sm">{index === 0 ? '👑 Team Leader' : `Member ${index + 1}`}</span>
-                    {teamMembers.length > 1 && index > 0 && (
+                    <span className="font-medium text-sm">👑 Team Leader</span>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <input type="text" value={user?.name || ''} readOnly className="px-3 py-2 border border-gray-300 rounded-lg bg-white" />
+                    <input type="email" value={user?.email || ''} readOnly className="px-3 py-2 border border-gray-300 rounded-lg bg-white" />
+                    <input type="tel" value={user?.phone || ''} readOnly className="px-3 py-2 border border-gray-300 rounded-lg bg-white" />
+                  </div>
+                </div>
+                {teamMembers.map((member, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-gray-50 relative">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-medium text-sm">Member {index + 1}</span>
                       <button
                         type="button"
                         onClick={() => removeTeamMember(index)}
@@ -272,8 +283,7 @@ export default function ManualPaymentForm({ event }: { event: any }) {
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                    )}
-                  </div>
+                    </div>
                   <div className="grid md:grid-cols-3 gap-3">
                     <input
                       type="text"
