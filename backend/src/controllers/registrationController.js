@@ -145,10 +145,14 @@ exports.createRegistration = async (req, res) => {
       });
     }
 
-    // Validate team size for team events
+    // Validate team size for team events.
+    // Frontend sends `teamMembers` as "other" members (leader is the registrant),
+    // so total team size = 1 (leader) + teamMembers.length
     if (event.eventType === 'team') {
-      console.log('Team validation - minSize:', event.minTeamSize, 'maxSize:', event.maxTeamSize, 'teamMembers:', teamMembers?.length);
-      if (!teamName || !teamMembers || teamMembers.length < event.minTeamSize || teamMembers.length > event.maxTeamSize) {
+      const otherCount = Array.isArray(teamMembers) ? teamMembers.length : 0;
+      const totalMembers = 1 + otherCount;
+      console.log('Team validation - minSize:', event.minTeamSize, 'maxSize:', event.maxTeamSize, 'otherMembers:', otherCount, 'totalMembers:', totalMembers);
+      if (!teamName || totalMembers < event.minTeamSize || totalMembers > event.maxTeamSize) {
         console.log('Team size validation failed');
         return res.status(400).json({
           success: false,
