@@ -34,6 +34,10 @@ export default function EditRegistrationPage() {
       setTeamName(registration.teamName || '')
       setUtrNumber(registration.utrNumber || '')
       setTeamMembers(registration.teamMembers || [])
+      // preload existing payment screenshot into preview if present
+      if (registration.paymentScreenshotUrl) {
+        setPreviewUrl(registration.paymentScreenshotUrl)
+      }
     }
   }, [registration])
 
@@ -91,33 +95,77 @@ export default function EditRegistrationPage() {
   if (isLoading) return <div className="py-12 text-center">Loading...</div>
   if (!registration) return <div className="py-12 text-center">Registration not found</div>
 
+  // Only allow editing when registration is rejected
+  if (registration.status !== 'rejected') {
+    return (
+      <div className="max-w-3xl mx-auto py-12 text-center">
+        <h3 className="text-xl font-semibold mb-4">Only rejected registrations can be edited and resubmitted</h3>
+        <p className="text-sm text-gray-600 mb-6">This registration is currently <strong>{registration.status}</strong>. You can only edit when it's rejected.</p>
+        <button onClick={() => router.back()} className="px-4 py-2 bg-primary-600 text-white rounded">Go back</button>
+      </div>
+    )
+  }
+
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <h2 className="text-2xl font-bold mb-4">Edit Registration</h2>
-      <p className="text-sm text-gray-600 mb-6">Update your payment details or team members and resubmit for verification.</p>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6 p-6 bg-gray-50 rounded-lg">
+        <h2 className="text-2xl font-bold mb-1">Edit Registration</h2>
+        <p className="text-sm text-gray-600">Update your payment details or team members and resubmit for verification.</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Event Info */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">{registration.event?.title}</h3>
+          <div className="flex gap-4 text-sm text-gray-600">
+            <span>Type: {registration.event?.eventType === 'team' ? 'Team Event' : 'Solo Event'}</span>
+            <span>Fee: ₹{registration.event?.registrationFee || registration.event?.registrationFee}</span>
+            {registration.event?.eventType === 'team' && (
+              <span>Team Size: {registration.event?.minTeamSize}-{registration.event?.maxTeamSize} members</span>
+            )}
+          </div>
+        </div>
+
+        {/* Team Name */}
         {registration.event?.eventType === 'team' && (
           <div>
             <label className="block text-sm font-medium mb-2">Team Name</label>
-            <input value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-3 py-2 border rounded" />
+            <input value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
           </div>
         )}
 
+        {/* Team Members */}
         {registration.event?.eventType === 'team' && (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold">Team Members</h4>
-              <button type="button" onClick={addMember} className="flex items-center gap-2 px-3 py-1 bg-primary-600 text-white rounded"> <Plus /> Add</button>
+          <div className="border-t pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-lg">Team Members</h3>
+              <button type="button" onClick={addMember} className="flex items-center gap-2 px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm">
+                <Plus className="w-4 h-4" /> Add Member
+              </button>
             </div>
-            <div className="space-y-3">
+
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium">👑 Team Leader</span>
+                </div>
+                <div className="grid md:grid-cols-3 gap-3">
+                  <input type="text" value={registration.user?.name || registration.attendeeInfo?.name || ''} readOnly className="px-3 py-2 border border-gray-300 rounded-lg bg-white" />
+                  <input type="email" value={registration.user?.email || registration.attendeeInfo?.email || ''} readOnly className="px-3 py-2 border border-gray-300 rounded-lg bg-white" />
+                  <input type="tel" value={registration.user?.phone || registration.attendeeInfo?.phone || ''} readOnly className="px-3 py-2 border border-gray-300 rounded-lg bg-white" />
+                </div>
+              </div>
+
               {teamMembers.map((m, idx) => (
-                <div key={idx} className="p-3 border rounded grid md:grid-cols-3 gap-2">
-                  <input value={m.name || ''} onChange={(e) => updateMember(idx, 'name', e.target.value)} placeholder="Full name" className="px-2 py-1 border rounded" />
-                  <input value={m.email || ''} onChange={(e) => updateMember(idx, 'email', e.target.value)} placeholder="Email" className="px-2 py-1 border rounded" />
-                  <div className="flex gap-2">
-                    <input value={m.phone || ''} onChange={(e) => updateMember(idx, 'phone', e.target.value)} placeholder="Phone" className="px-2 py-1 border rounded flex-1" />
-                    <button type="button" onClick={() => removeMember(idx)} className="text-red-600 px-2"> <Trash2 /> </button>
+                <div key={idx} className="p-4 rounded-lg bg-gray-50 relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-medium text-sm">Member {idx + 2}</span>
+                    <button type="button" onClick={() => removeMember(idx)} className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <input value={m.name || ''} onChange={(e) => updateMember(idx, 'name', e.target.value)} placeholder="Full Name" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2" />
+                    <input value={m.email || ''} onChange={(e) => updateMember(idx, 'email', e.target.value)} placeholder="Email" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2" />
+                    <input value={m.phone || ''} onChange={(e) => updateMember(idx, 'phone', e.target.value)} placeholder="Phone" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2" />
                   </div>
                 </div>
               ))}
@@ -125,36 +173,37 @@ export default function EditRegistrationPage() {
           </div>
         )}
 
-        <div>
+        {/* UTR */}
+        <div className="border-t pt-6">
           <label className="block text-sm font-medium mb-2">UTR / Transaction Reference</label>
-          <input value={utrNumber} onChange={(e) => setUtrNumber(e.target.value)} className="w-full px-3 py-2 border rounded" />
+          <input value={utrNumber} onChange={(e) => setUtrNumber(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2" placeholder="Enter UTR" />
         </div>
 
+        {/* Payment Screenshot */}
         <div>
           <label className="block text-sm font-medium mb-2">Payment Screenshot</label>
-          <div className="border-dashed border-2 p-4 rounded text-center">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             {previewUrl ? (
               <div className="relative">
-                <Image src={previewUrl} alt="Preview" width={600} height={400} className="mx-auto max-h-64 object-contain" unoptimized />
-                <button type="button" onClick={() => { setPreviewUrl(null); setSelectedFile(null); }} className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full"><X /></button>
+                <Image src={previewUrl} alt="Preview" width={400} height={300} className="max-h-64 mx-auto rounded-lg object-contain" unoptimized />
+                <button type="button" onClick={() => { setPreviewUrl(null); setSelectedFile(null); }} className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"><X className="w-4 h-4" /></button>
               </div>
             ) : (
               <div>
-                <Upload className="mx-auto mb-2" />
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
                 <label className="cursor-pointer">
-                  <span className="text-primary-600">Click to upload</span>
+                  <span className="text-primary-600 hover:text-primary-700 font-medium">Click to upload</span>
+                  <span className="text-gray-600"> or drag and drop</span>
                   <input type="file" accept="image/jpeg,image/jpg,image/png" onChange={handleFileChange} className="hidden" />
                 </label>
-                <p className="text-xs text-gray-500 mt-2">PNG/JPG up to 2MB</p>
+                <p className="text-sm text-gray-500 mt-2">PNG, JPG up to 2MB</p>
               </div>
             )}
           </div>
         </div>
 
-        <div>
-          <button type="submit" disabled={submitting} className="w-full bg-primary-600 text-white py-2 rounded">
-            {submitting ? 'Submitting...' : 'Update & Resubmit'}
-          </button>
+        <div className="border-t pt-6">
+          <button type="submit" disabled={submitting} className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700">{submitting ? 'Submitting...' : 'Update & Resubmit'}</button>
         </div>
       </form>
     </div>
