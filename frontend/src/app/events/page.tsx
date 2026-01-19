@@ -277,7 +277,7 @@ export default function EventsPage() {
                     <div className="flex items-center gap-3 text-gray-700">
                       <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 flex-shrink-0" />
                       <span className="text-xs sm:text-sm font-medium">
-                        {event.registeredCount || 0}/{event.capacity} Registered
+                        {Math.max(0, event.registeredCount || 0)}/{event.capacity} Registered
                       </span>
                     </div>
                   </div>
