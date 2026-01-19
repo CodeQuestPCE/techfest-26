@@ -337,11 +337,16 @@ exports.cancelRegistration = async (req, res) => {
     registration.status = 'cancelled';
     await registration.save();
 
-    // Atomic increment of ticket availability and decrement registeredCount on cancellation
-    await Event.updateOne(
-      { _id: registration.event, "ticketTypes.name": registration.ticketType },
-      { $inc: { "ticketTypes.$.available": registration.quantity, registeredCount: -registration.quantity } }
-    );
+    // Restore ticket availability and clamp registeredCount on cancellation
+    const event = await Event.findById(registration.event);
+    if (event) {
+      const ticket = event.ticketTypes.find(t => t.name === registration.ticketType);
+      if (ticket) {
+        ticket.available = Math.min((ticket.available || 0) + registration.quantity, ticket.quantity || (event.capacity || 0));
+      }
+      event.registeredCount = Math.max(0, (event.registeredCount || 0) - registration.quantity);
+      await event.save();
+    }
 
     // Cancel tickets
     await Ticket.updateMany(

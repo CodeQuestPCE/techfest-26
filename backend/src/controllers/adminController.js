@@ -163,8 +163,10 @@ exports.rejectRegistration = async (req, res) => {
     const event = await Event.findById(registration.event._id);
     const ticket = event.ticketTypes.find(t => t.name === registration.ticketType);
     if (ticket) {
-      ticket.available += registration.quantity;
-      event.registeredCount -= registration.quantity;
+      // Restore availability but clamp to ticket.quantity
+      ticket.available = Math.min((ticket.available || 0) + registration.quantity, ticket.quantity || (event.capacity || 0));
+      // Ensure registeredCount does not go below 0
+      event.registeredCount = Math.max(0, (event.registeredCount || 0) - registration.quantity);
       await event.save();
     }
 

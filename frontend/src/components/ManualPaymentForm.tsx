@@ -1,6 +1,6 @@
  'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,8 +17,9 @@ const registrationSchema = z.object({
   teamName: z.string().optional(),
 });
 
-export default function ManualPaymentForm({ event }: { event: any }) {
+export default function ManualPaymentForm({ event, initialRegistration, submitMethod, submitEndpoint }: { event: any, initialRegistration?: any, submitMethod?: 'POST' | 'PATCH', submitEndpoint?: string }) {
   const router = useRouter();
+  const submittingRef = useRef(false);
   const user = useAuthStore((state) => state.user);
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -37,6 +38,34 @@ export default function ManualPaymentForm({ event }: { event: any }) {
 
   const fallbackQrDataUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256"%3E%3Crect fill="%23f0f0f0" width="256" height="256"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="14"%3EQR Code Not Available%3C/text%3E%3C/svg%3E';
   const [qrSrc, setQrSrc] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    resolver: zodResolver(registrationSchema),
+  });
+  // If editing an existing registration, prefill form values
+  useEffect(() => {
+    if (initialRegistration) {
+      setPreviewUrl(initialRegistration.paymentScreenshotUrl || null);
+      // populate teamMembers state (these are OTHER members)
+      setTeamMembers(initialRegistration.teamMembers || []);
+      // prefill form fields (utr, teamName) when editing
+      try {
+        // `reset` is added to the form below; guard if not available
+        if (typeof (reset as any) === 'function') {
+          reset({
+            utrNumber: initialRegistration.utrNumber || '',
+            teamName: initialRegistration.teamName || ''
+          });
+        }
+      } catch (e) {
+        // no-op
+      }
+    }
+  }, [initialRegistration, reset]);
 
   useEffect(() => {
     if (paymentSettings?.qrCodeUrl) {
@@ -49,13 +78,7 @@ export default function ManualPaymentForm({ event }: { event: any }) {
     }
   }, [paymentSettings]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(registrationSchema),
-  });
+  
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -97,6 +120,9 @@ export default function ManualPaymentForm({ event }: { event: any }) {
   };
 
   const onSubmit = async (data: any) => {
+    // prevent duplicate submits from rapid clicks / HMR loops
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     try {
       if (!selectedFile) {
         toast.error('Please upload payment screenshot');
@@ -124,7 +150,9 @@ export default function ManualPaymentForm({ event }: { event: any }) {
       formData.append('ticketType', 'General');
       formData.append('quantity', '1');
       formData.append('utrNumber', data.utrNumber);
-      formData.append('paymentScreenshot', selectedFile);
+      if (selectedFile) {
+        formData.append('paymentScreenshot', selectedFile);
+      }
 
       if (event.eventType === 'team') {
         formData.append('teamName', data.teamName);
@@ -132,11 +160,15 @@ export default function ManualPaymentForm({ event }: { event: any }) {
         formData.append('teamMembers', JSON.stringify(validMembers));
       }
 
-      const response = await api.post('/registrations', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      let response;
+      const method = submitMethod === 'PATCH' && submitEndpoint ? 'PATCH' : 'POST';
+      const endpoint = submitMethod === 'PATCH' && submitEndpoint ? submitEndpoint : '/registrations';
+      console.debug('[ManualPaymentForm] submitting', { method, endpoint });
+      if (method === 'PATCH') {
+        response = await api.patch(endpoint, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      } else {
+        response = await api.post(endpoint, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
 
       toast.success('Registration submitted! Payment verification pending.');
       setTimeout(() => {
@@ -146,6 +178,7 @@ export default function ManualPaymentForm({ event }: { event: any }) {
       toast.error(error.response?.data?.message || 'Registration failed');
     } finally {
       setUploading(false);
+      submittingRef.current = false;
     }
   };
 
@@ -391,10 +424,10 @@ export default function ManualPaymentForm({ event }: { event: any }) {
         <div className="border-t pt-6">
           <button
             type="submit"
-            disabled={isSubmitting || uploading || !selectedFile}
+            disabled={isSubmitting || uploading || (!selectedFile && !(initialRegistration && initialRegistration.paymentScreenshotUrl))}
             className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isSubmitting || uploading ? 'Submitting...' : 'Submit Registration'}
+            {isSubmitting || uploading ? 'Submitting...' : (submitMethod === 'PATCH' ? 'Update & Resubmit' : 'Submit Registration')}
           </button>
         </div>
       </form>

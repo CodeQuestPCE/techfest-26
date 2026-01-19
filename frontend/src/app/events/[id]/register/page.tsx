@@ -1,11 +1,12 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { eventService } from '@/services/eventService';
 import { useAuthStore } from '@/store/authStore';
 import ManualPaymentForm from '@/components/ManualPaymentForm';
+import api from '@/lib/api';
 import { Sparkles, LogOut, ArrowLeft } from 'lucide-react';
 import MobileMenu from '@/components/MobileMenu';
 
@@ -24,6 +25,21 @@ export default function EventRegisterPage() {
     queryKey: ['event', eventId],
     queryFn: () => eventService.getEvent(eventId),
     enabled: isAuthenticated(),
+  });
+
+  const searchParams = useSearchParams();
+  const editId = searchParams?.get('edit');
+
+  const { data: editRegistration } = useQuery({
+    queryKey: ['registration', editId],
+    queryFn: async () => {
+      if (!editId) return null;
+      const res = await api.get(`/registrations/${editId}`);
+      return res.data.data;
+    },
+    enabled: !!editId && isAuthenticated(),
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 
   // Redirect if not authenticated
@@ -117,7 +133,12 @@ export default function EventRegisterPage() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 sm:mb-3">Register for Event</h1>
           <h2 className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 font-medium">{eventData.title}</h2>
 
-          <ManualPaymentForm event={eventData} />
+          <ManualPaymentForm
+            event={eventData}
+            initialRegistration={editRegistration || undefined}
+            submitMethod={editId ? 'PATCH' : 'POST'}
+            submitEndpoint={editId ? `/registrations/${editId}` : undefined}
+          />
         </div>
       </div>
     </div>
